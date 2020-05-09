@@ -64,7 +64,6 @@
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
-    "@babel/preset-env": "^7.9.6",
     "@babel/preset-typescript": "^7.9.0",
     "@electron-forge/cli": "^6.0.0-beta.51",
     "@electron-forge/maker-deb": "^6.0.0-beta.51",

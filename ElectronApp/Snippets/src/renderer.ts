@@ -38,7 +38,7 @@ axios.get("https://api.github.com/users/mapbox").then((response) => {
   console.log(response.config);
 });
 
-let model = monaco.editor.createModel(
+const model = monaco.editor.createModel(
   ["function x() {", '\tconsole.log("Hello world!");', "}"].join("\n"),
   "javascript"
 );
