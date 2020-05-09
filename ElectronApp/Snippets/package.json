@@ -63,6 +63,9 @@
     }
   },
   "devDependencies": {
+    "@babel/core": "^7.9.6",
+    "@babel/preset-env": "^7.9.6",
+    "@babel/preset-typescript": "^7.9.0",
     "@electron-forge/cli": "^6.0.0-beta.51",
     "@electron-forge/maker-deb": "^6.0.0-beta.51",
     "@electron-forge/maker-rpm": "^6.0.0-beta.51",
@@ -72,6 +75,7 @@
     "@marshallofsound/webpack-asset-relocator-loader": "^0.5.0",
     "@typescript-eslint/eslint-plugin": "^2.31.0",
     "@typescript-eslint/parser": "^2.31.0",
+    "babel-loader": "^8.1.0",
     "css-loader": "^3.5.3",
     "electron": "8.2.5",
     "eslint": "^6.8.0",
@@ -80,7 +84,8 @@
     "node-loader": "^0.6.0",
     "style-loader": "^0.23.1",
     "ts-loader": "^6.2.2",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "webpack": "^4.43.0"
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0"
