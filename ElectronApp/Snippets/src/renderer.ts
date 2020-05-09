@@ -27,5 +27,15 @@
  */
 
 import './index.css';
+import axios from 'axios';
+
+axios.get('https://api.github.com/users/mapbox')
+  .then((response) => {
+    console.log(response.data);
+    console.log(response.status);
+    console.log(response.statusText);
+    console.log(response.headers);
+    console.log(response.config);
+  });
 
 console.log('👋 This message is being logged by "renderer.js", included via webpack');

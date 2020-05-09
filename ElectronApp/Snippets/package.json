@@ -88,6 +88,7 @@
     "webpack": "^4.43.0"
   },
   "dependencies": {
+    "axios": "^0.19.2",
     "electron-squirrel-startup": "^1.0.0"
   }
 }
