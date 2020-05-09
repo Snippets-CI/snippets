@@ -26,16 +26,36 @@
  * ```
  */
 
-import './index.css';
-import axios from 'axios';
+import "./index.css";
+import axios from "axios";
+import * as monaco from "monaco-editor";
 
-axios.get('https://api.github.com/users/mapbox')
-  .then((response) => {
-    console.log(response.data);
-    console.log(response.status);
-    console.log(response.statusText);
-    console.log(response.headers);
-    console.log(response.config);
-  });
+axios.get("https://api.github.com/users/mapbox").then((response) => {
+  console.log(response.data);
+  console.log(response.status);
+  console.log(response.statusText);
+  console.log(response.headers);
+  console.log(response.config);
+});
 
-console.log('👋 This message is being logged by "renderer.js", included via webpack');
+let model = monaco.editor.createModel(
+  ["function x() {", '\tconsole.log("Hello world!");', "}"].join("\n"),
+  "javascript"
+);
+
+const editor = monaco.editor.create(document.getElementById("container"), {
+  theme: "vs-dark",
+});
+
+editor.setModel(model);
+
+const myBinding = editor.addCommand(
+  monaco.KeyMod.CtrlCmd | monaco.KeyCode.F10,
+  function () {
+    alert("CTRL + F10 pressed!");
+  }
+);
+
+console.log(
+  '👋 This message is being logged by "renderer.js", included via webpack'
+);

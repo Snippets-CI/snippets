@@ -5,6 +5,10 @@ module.exports = [
     use: 'node-loader',
   },
   {
+    test: /\.ttf$/,
+    use: 'file-loader',
+  },
+  {
     test: /\.(m?js|node)$/,
     parser: { amd: false },
     use: {
