@@ -27,24 +27,30 @@
  */
 
 import "./index.css";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap';
+import 'bootstrap-select'
+import 'bootstrap-select/dist/css/bootstrap-select.min.css'
 import axios from "axios";
 import * as monaco from "monaco-editor";
 
+/*
 axios.get("https://api.github.com/users/mapbox").then((response) => {
   console.log(response.data);
   console.log(response.status);
   console.log(response.statusText);
   console.log(response.headers);
   console.log(response.config);
-});
+});*/
 
 const model = monaco.editor.createModel(
   ["function x() {", '\tconsole.log("Hello world!");', "}"].join("\n"),
   "javascript"
 );
 
-const editor = monaco.editor.create(document.getElementById("container"), {
+const editor = monaco.editor.create(document.getElementById("monaco-container"), {
   theme: "vs-dark",
+  scrollBeyondLastLine: false
 });
 
 editor.setModel(model);
@@ -55,6 +61,19 @@ const myBinding = editor.addCommand(
     alert("CTRL + F10 pressed!");
   }
 );
+
+function updateDimensions() {
+  editor.layout();
+}
+
+window.addEventListener("resize", updateDimensions.bind(this));
+
+
+function componentWillUnmount() {
+  window.removeEventListener("resize", updateDimensions.bind(this));
+}
+
+editor.layout();
 
 console.log(
   '👋 This message is being logged by "renderer.js", included via webpack'

@@ -1,6 +1,21 @@
+html,
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  margin: auto;
-  max-width: 38rem;
-  padding: 2rem;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+#monaco-container {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  width: 100%;
+  height: calc(100% - 165px);
+  overflow: hidden;
+}
+
+.bg-monaco {
+  background-color: #222425;
 }
