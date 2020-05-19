@@ -1,12 +1,16 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/go-chi/cors"
+	"github.com/go-chi/render"
+	_ "github.com/lib/pq"
 )
 
 type Snippet struct {
@@ -22,8 +26,14 @@ type User struct {
 	Snippets []Snippet `json:"-"`
 }
 
+type LoginCredentials struct {
+	Name     string `json:"username,omitempty" bson:"username,omitempty"`
+	Password string `json:"password,omitempty" bson:"password,omitempty"`
+}
+
 const WELCOME_MESSAGE = "Welcome to SNIPPETS!"
 const ERROR_MESSAGE = "Error Resource not found"
+const ERROR_MESSAGE_MAILFORMED_JSON = "Invalid Json found"
 
 var users = []User{}
 
@@ -132,10 +142,78 @@ func putUserSnippetDetails(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(snippet)
 }
 
+// POST - Reqest
+// Authenticates user
+
+func loginUser(w http.ResponseWriter, r *http.Request) {
+
+	dbUserName, dbPassword := getUserCredentialsDB()
+
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+
+	var credentials LoginCredentials
+	err := dec.Decode(&credentials)
+
+	if err != nil {
+		json.NewEncoder(w).Encode(ERROR_MESSAGE_MAILFORMED_JSON)
+	}
+
+	fmt.Println("########")
+	fmt.Println(dbUserName)
+	fmt.Println(dbPassword)
+}
+
+func getUserCredentialsDB() (string, string) {
+	// Quick and Dirty
+	// Should be refactored
+	db, err := sql.Open("postgres",
+		"postgresql://restapi@localhost:26257/snippet?sslmode=disable")
+	if err != nil {
+		log.Fatal("error connecting to the database: ", err)
+	}
+
+	//TODO update selcet query and handle response
+	rows, err := db.Query("SELECT username, password FROM users")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//Close after for loop
+	defer rows.Close()
+
+	for rows.Next() {
+		var username, password string
+		if err := rows.Scan(&username, &password); err != nil {
+			log.Fatal(err)
+		}
+		return username, password
+	}
+
+	return "sdf", "asfd"
+}
+
 func registerRoutes() http.Handler {
 	r := chi.NewRouter()
+
+	r.Use(render.SetContentType(render.ContentTypeJSON))
+	r.Use(cors.Handler(cors.Options{
+		// AllowedOrigins: []string{"https://foo.com"}, // Use this to allow specific origin hosts
+		AllowedOrigins: []string{"*"},
+		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
+
 	r.Route("/", func(r chi.Router) {
 		r.Get("/", getWelcomeMessage)
+	})
+
+	r.Route("/login", func(r chi.Router) {
+		r.Post("/", loginUser)
 	})
 
 	// route: /users
