@@ -57,7 +57,7 @@
                 },
                 {
                   "html": "./src/login.html",
-                  "js": "./src/renderer.ts",
+                  "js": "./src/login.ts",
                   "name": "login_window"
                 }
               ]

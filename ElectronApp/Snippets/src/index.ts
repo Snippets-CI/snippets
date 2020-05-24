@@ -26,19 +26,13 @@ const createWindow = () => {
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-  /*mainWindow.loadURL(url.format({
-    pathname:path.join(__dirname, "index.html"),
-    protocol: 'file',
-    slashes: true
-  }))*/
+
 
 
   loginChildView = new BrowserWindow({
     parent: mainWindow,
     height:400,
     width:800,
-    resizable: false,
-    transparent: true,
     frame:false
   })
 

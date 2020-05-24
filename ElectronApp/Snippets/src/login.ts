@@ -7,21 +7,32 @@ import axios from "axios";
 const LOGIN_URL = 'http://localhost:8080/login';
 
 
-//var loginBtn = document.getElementById("snippetLoginBtn");
 
-/*loginBtn.addEventListener("click", function() {
+var loginBtn = document.getElementById("loginBtn");
+var registerBtn = document.getElementById("registerBtn");
+var userNameLBL = document.getElementById("username");
 
-    let $ = require('jquery')
-    const ipc = require('electron').ipcRenderer;
+console.log(loginBtn)
 
-    ipc.sendSync('entry-accepted', 'ping')
-    //var username = (document.getElementById("inputUserName") as HTMLInputElement).value;
-    //var password = (document.getElementById("inputPassword") as HTMLInputElement).value;
-    //authenticate(username, password);
+window.addEventListener('focus', () => userNameLBL.focus())
+//window.addEventListener('DOMContentLoaded', () => initialize());
+
+loginBtn.addEventListener("click", function() {
+
+    
+    var username = (document.getElementById("username") as HTMLInputElement).value;
+    var password = (document.getElementById("password") as HTMLInputElement).value;
+    authenticate(username, password);
 });
 
+function initialize() {
+
+}
 
 function authenticate(username: string, password: string) {
+    const ipc = require('electron').ipcRenderer;
+    ipc.sendSync('entry-accepted', 'hideLoginForm')
+
     console.log(username + " . " + password);
     // TODO: hash password
     
@@ -35,12 +46,10 @@ function authenticate(username: string, password: string) {
         console.log(response);
         //TODO: handle response (JWT)
         //TODO mb use a logindialog
-        //document.location.href = './index.html';
     
     }, (error) => {
         console.log(error);
-        //document.location.href = 'index.html';
     });
 
-    */
+
 }
