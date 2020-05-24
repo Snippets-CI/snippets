@@ -3,27 +3,24 @@
 #### Needed software
 https://golang.org/
 
-#### golang-chi
-https://github.com/go-chi/chi
+#### Installs & Setup
 
-Install:
-> go get -u github.com/go-chi/chi
+First: Setup go modules with the git repo:  
+> go mod init github.com/AndreasRoither/Snippets
 
-Usage:
-```golang
-import (
-	"net/http"
+Then install needed modules:
+> go get -u github.com/go-chi/chi  
+> go get -u github.com/go-chi/render   
+> go get -u github.com/lib/pq  
+> go get -u github.com/go-chi/cors  
 
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
-)
+#### Go Commands
 
-func main() {
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("welcome"))
-	})
-	http.ListenAndServe(":3000", r)
-}
-```
+Install needed packages when checking out the repo:
+> go install
+
+Build an .exe file:  
+> go build  
+
+Run:
+> go run main.go strings.go domain.go
