@@ -13,28 +13,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type Snippet struct {
-	Id    string `json:"id"`
-	Lang  string `json:"lang"`
-	About string `json:"about"`
-	Code  string `json:"code"`
-}
-
-type User struct {
-	Name     string    `json:"name"`
-	Password string    `json:"password"`
-	Snippets []Snippet `json:"-"`
-}
-
-type LoginCredentials struct {
-	Name     string `json:"username,omitempty" bson:"username,omitempty"`
-	Password string `json:"password,omitempty" bson:"password,omitempty"`
-}
-
-const WELCOME_MESSAGE = "Welcome to SNIPPETS!"
-const ERROR_MESSAGE = "Error Resource not found"
-const ERROR_MESSAGE_MAILFORMED_JSON = "Invalid Json found"
-
 var users = []User{}
 
 // Creates Mockdata which in future we will get from the database
@@ -62,7 +40,7 @@ func getUser(userID string) User {
 
 func getUserSnippet(user User, snippetID string) Snippet {
 	for _, snippet := range user.Snippets {
-		if snippet.Id == snippetID {
+		if snippet.ID == snippetID {
 			return snippet
 		}
 	}
@@ -72,7 +50,7 @@ func getUserSnippet(user User, snippetID string) Snippet {
 // GET - Request
 // Outputs Welcome Msg
 func getWelcomeMessage(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(WELCOME_MESSAGE)
+	json.NewEncoder(w).Encode(WelcomeMessage)
 }
 
 // GET - Request
@@ -90,53 +68,53 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 // GET - Request
 // Outputs the requested user as json
 func getUserDetails(w http.ResponseWriter, r *http.Request) {
-	userId := chi.URLParam(r, "userID")
+	userID := chi.URLParam(r, "userID")
 
-	user := getUser(userId)
+	user := getUser(userID)
 
-	user_json, _ := json.Marshal(user)
-	json.NewEncoder(w).Encode(string(user_json))
+	userJSON, _ := json.Marshal(user)
+	json.NewEncoder(w).Encode(string(userJSON))
 
 }
 
 // GET - Request
 // Outputs all saved Snippets of a user
 func getUserSnippets(w http.ResponseWriter, r *http.Request) {
-	userId := chi.URLParam(r, "userID")
+	userID := chi.URLParam(r, "userID")
 
-	user := getUser(userId)
+	user := getUser(userID)
 
-	snippets_json, _ := json.Marshal(user.Snippets)
-	json.NewEncoder(w).Encode(string(snippets_json))
+	snippetsJSON, _ := json.Marshal(user.Snippets)
+	json.NewEncoder(w).Encode(string(snippetsJSON))
 }
 
 // GET - Request
 // Outputs the requested snipped of a user
 func getUserSnippetDetails(w http.ResponseWriter, r *http.Request) {
-	userId := chi.URLParam(r, "userID")
-	snippetId := chi.URLParam(r, "snippetID")
+	userID := chi.URLParam(r, "userID")
+	snippetID := chi.URLParam(r, "snippetID")
 
-	user := getUser(userId)
-	snippet := getUserSnippet(user, snippetId)
+	user := getUser(userID)
+	snippet := getUserSnippet(user, snippetID)
 
-	snippet_json, _ := json.Marshal(snippet)
-	json.NewEncoder(w).Encode(string(snippet_json))
+	snippetJSON, _ := json.Marshal(snippet)
+	json.NewEncoder(w).Encode(string(snippetJSON))
 }
 
 // PUT - Request
 // Updates a snippet of a user
 func putUserSnippetDetails(w http.ResponseWriter, r *http.Request) {
-	userId := chi.URLParam(r, "userID")
-	snippetId := chi.URLParam(r, "snippetID")
+	userID := chi.URLParam(r, "userID")
+	snippetID := chi.URLParam(r, "snippetID")
 	snippetString := chi.URLParam(r, "snippet")
 	snippet := Snippet{}
 	err := json.Unmarshal([]byte(snippetString), &snippet)
 
 	fmt.Println(r.Context().Value("snippet"))
-	fmt.Println(userId + " - " + snippetId + " - " + snippetString)
+	fmt.Println(userID + " - " + snippetID + " - " + snippetString)
 
 	if err != nil {
-		json.NewEncoder(w).Encode(ERROR_MESSAGE)
+		json.NewEncoder(w).Encode(ErrorMessage)
 	}
 
 	fmt.Println(snippet)
@@ -156,7 +134,7 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 	err := dec.Decode(&credentials)
 
 	if err != nil {
-		json.NewEncoder(w).Encode(ERROR_MESSAGE_MAILFORMED_JSON)
+		json.NewEncoder(w).Encode(ErrorMessageMalformedJSON)
 	}
 
 	fmt.Println("########")
@@ -244,5 +222,5 @@ func main() {
 
 	fmt.Println("REST API started!")
 	r := registerRoutes()
-	log.Fatal(http.ListenAndServe(":8080", r))
+	log.Fatal(http.ListenAndServe(":8000", r))
 }
