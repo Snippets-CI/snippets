@@ -1,0 +1,32 @@
+# Use postgres/example user/password credentials
+version: '3.1'
+
+# Create a local data volume since windows and linux postgresql file systems
+# won't work together... on linux use a normal volume ./data
+# docker volume create --name data -d local
+
+services:
+
+  db:
+    image: postgres
+    container_name: snippets_postgres_db
+    restart: always
+    volumes:
+      - data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 123
+    ports:
+      - 5432:5432
+
+  adminer:
+    image: adminer
+    container_name: snippets_adminer
+    restart: always
+    ports:
+      - 8000:8080
+
+# comment out if normal os volumes are used
+volumes:
+  data:
+    external: true
