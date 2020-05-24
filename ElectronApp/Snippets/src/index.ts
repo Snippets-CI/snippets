@@ -1,6 +1,9 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
+const path=require('path')
+const url=require('url')
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
+declare const LOGIN_WINDOW_WEBPACK_ENTRY: any;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -8,28 +11,65 @@ if (require("electron-squirrel-startup")) {
   app.quit();
 }
 
+let mainWindow: BrowserWindow
+let loginChildView: BrowserWindow
+
 const createWindow = () => {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
+    webPreferences: {
+      nodeIntegration: true
+    },
     height: 800,
-    width: 1200,
+    width: 1200
   });
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+  /*mainWindow.loadURL(url.format({
+    pathname:path.join(__dirname, "index.html"),
+    protocol: 'file',
+    slashes: true
+  }))*/
 
+
+  loginChildView = new BrowserWindow({
+    parent: mainWindow,
+    height:400,
+    width:800,
+    resizable: false,
+    transparent: true,
+    frame:false
+  })
+
+  loginChildView.loadURL(LOGIN_WINDOW_WEBPACK_ENTRY)
+
+  //loginChildView.webContents.openDevTools()
+
+
+
+  
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  //mainWindow.webContents.openDevTools();
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.setSize(800,1200);// new (i didn't checked but maybe before `mainWindow.show();` is better to place this line of code)
     mainWindow.show();
+  })
+
+  //mainWindow.on('resize', () => {
+    //console.log("T")
+  //});
+};
+
+
+ipcMain.on('entry-accepted', (event, arg) => {
+  if(arg=='hideLoginForm'){
+      mainWindow.show()
+      loginChildView.hide()
+  }
 })
 
-  mainWindow.on('resize', () => {
-    //console.log("T")
-  });
-};
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

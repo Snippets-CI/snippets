@@ -1,43 +1,78 @@
-<!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=yes">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Hello World!</title>
-
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Login</title>
 </head>
+<body class="draggable-area">
+	<div class="loginPage row">
+		<div class="sidenav col-md-4">
+			<div class="login-main-text">
+				<h2>Welcome to<br> Snippets</h2>
+				<p>Login or register from here to access.</p>
+			</div>
+		</div>
+		<div class="main col-md-4">
+			<div class="login-form">
+				<form>
+					<div class="form-group">
+						<label>User Name</label>
+						<input type="text" class="form-control" placeholder="User Name">
+					</div>
+					<div class="form-group">
+						<label>Password</label>
+						<input type="password" class="form-control" placeholder="Password">
+					</div>
+					<button type="submit" class="btn btn-black">Login</button>
+					<button type="submit" class="btn btn-secondary">Register</button>
+				</form>
+			</div>
+		</div>
+		<div class="col-md-2">
 
-<body>
-  <nav class="navbar navbar-dark bg-dark flex-md-nowrap p-0">
-    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Username</a>
-
-    <ul class="navbar-nav px-3">
-      <li class="nav-item text-nowrap">
-        <a class="nav-link" href="#">Sign out</a>
-      </li>
-    </ul>
-  </nav>
-
-  <div class="container">
-    <div class="card card-container">
-        <img id="profile-img" class="profile-img-card" src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" height="200" width="200"/>
-        <p id="profile-name" class="profile-name-card"></p>
-            <span id="reauth-email" class="reauth-email"></span>
-            <input type="email" id="inputUserName" class="form-control" placeholder="Email address" required autofocus>
-            <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
-            <div id="remember" class="checkbox">
-                <label>
-                    <input type="checkbox" value="remember-me"> Remember me
-                </label>
-            </div>
-            <buton id="snippetLoginBtn" class="btn btn-lg btn-primary btn-block btn-signin" type="submit">Sign in</button>
-
-    </div>
-</div>
-
+		</div>
+	</div>
 </body>
-
-
 </html>
+
+
+<style>
+	body {
+	font-family: "Lato", sans-serif;
+	}
+
+	.draggable-area{
+		-webkit-app-region: drag;
+	}
+
+	.loginPage {
+		height: 100%;
+	}
+
+	.sidenav {
+	height: 100%;
+	background-color: #000;
+	overflow-x: hidden;
+	padding-top: 5%;
+	}
+
+
+	.login-main-text{
+	color: #fff;
+	margin-left: 10%;
+	}
+
+	.login-main-text h2{
+	font-weight: 300;
+	margin-bottom: 10%;
+	}
+
+	.main {
+		margin-top: 7%;
+	}
+
+	.btn-black{
+	background-color: #000 !important;
+	color: #fff;
+	}
+</style>

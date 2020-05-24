@@ -51,9 +51,14 @@
               "config": "./webpack.renderer.config.js",
               "entryPoints": [
                 {
-                  "html": "./src/login.html",
-                  "js": "./src/login.ts",
+                  "html": "./src/index.html",
+                  "js": "./src/renderer.ts",
                   "name": "main_window"
+                },
+                {
+                  "html": "./src/login.html",
+                  "js": "./src/renderer.ts",
+                  "name": "login_window"
                 }
               ]
             }
