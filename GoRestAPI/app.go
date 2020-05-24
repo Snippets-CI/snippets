@@ -217,9 +217,7 @@ func getUserSnippetDetails(w http.ResponseWriter, r *http.Request) {
 	user := getUser(userID)
 	snippet := getUserSnippet(user, snippetID)
 
-	snippetJSON, _ := json.Marshal(snippet)
-	fmt.Println(snippet)
-	json.NewEncoder(w).Encode(string(snippetJSON))
+	respondWithJSON(w, http.StatusOK, snippet)
 }
 
 // PUT - Request
