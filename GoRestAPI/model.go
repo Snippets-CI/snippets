@@ -7,6 +7,7 @@ import (
 // Snippet from DB
 type Snippet struct {
 	ID    string `json:"id"`
+	Name  string `json:"name"`
 	Lang  string `json:"lang"`
 	About string `json:"about"`
 	Code  string `json:"code"`

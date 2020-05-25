@@ -137,10 +137,10 @@ var users = []User{}
 
 // Creates Mockdata which in future we will get from the database
 func createMockData() {
-	snippet1 := Snippet{`snippet1`, `java`, `stdout`, `System.out.println("Hello World");`}
-	snippet2 := Snippet{`snippet2`, `go`, `structure`, `type User struct {\n    name string\n    lastname string\n    age int\n} `}
-	snippet3 := Snippet{`snippet3`, `python`, `stdout`, `print("Hello World")`}
-	snippet4 := Snippet{`snippet4`, `javascript`, `objects`, `var car = {\n    type:"Fiat",\n    model:"500",\n     color:"white"\n};`}
+	snippet1 := Snippet{`1`, `Hello world simple`, `java`, `stdout`, `System.out.println("Hello World");`}
+	snippet2 := Snippet{`2`, `struct`, `go`, `structure`, `type User struct {\n    name string\n    lastname string\n    age int\n} `}
+	snippet3 := Snippet{`3`, `Hello World Python`, `python`, `stdout`, `print("Hello World from Go Rest API")`}
+	snippet4 := Snippet{`4`, `Car`, `javascript`, `objects`, `var car = {\n    type:"Fiat",\n    model:"500",\n     color:"white"\n};`}
 
 	user1Snippets := []Snippet{snippet1, snippet2}
 	user2Snippets := []Snippet{snippet3, snippet4}
@@ -170,7 +170,7 @@ func getUserSnippet(user User, snippetID string) Snippet {
 // GET - Request
 // Outputs Welcome Msg
 func getWelcomeMessage(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(WelcomeMessage)
+	respondWithJSON(w, http.StatusOK, WelcomeMessage)
 }
 
 // GET - Request
@@ -182,7 +182,7 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 		availableUsers = append(availableUsers, user.Name)
 	}
 
-	json.NewEncoder(w).Encode(availableUsers)
+	respondWithJSON(w, http.StatusOK, availableUsers)
 }
 
 // GET - Request
@@ -191,9 +191,7 @@ func getUserDetails(w http.ResponseWriter, r *http.Request) {
 	userID := chi.URLParam(r, "userID")
 
 	user := getUser(userID)
-
-	userJSON, _ := json.Marshal(user)
-	json.NewEncoder(w).Encode(string(userJSON))
+	respondWithJSON(w, http.StatusOK, user)
 
 }
 
@@ -203,9 +201,7 @@ func getUserSnippets(w http.ResponseWriter, r *http.Request) {
 	userID := chi.URLParam(r, "userID")
 
 	user := getUser(userID)
-
-	snippetsJSON, _ := json.Marshal(user.Snippets)
-	json.NewEncoder(w).Encode(string(snippetsJSON))
+	respondWithJSON(w, http.StatusOK, user.Snippets)
 }
 
 // GET - Request
