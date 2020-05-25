@@ -59,6 +59,11 @@
                   "html": "./src/login.html",
                   "js": "./src/login.ts",
                   "name": "login_window"
+                },
+                {
+                  "html": "./src/splash.html",
+                  "js": "./src/splash.ts",
+                  "name": "splash_window"
                 }
               ]
             }
@@ -86,8 +91,11 @@
     "eslint-plugin-import": "^2.20.2",
     "file-loader": "^6.0.0",
     "fork-ts-checker-webpack-plugin": "^3.1.1",
+    "mini-css-extract-plugin": "^0.9.0",
     "node-loader": "^0.6.0",
+    "node-sass": "^4.14.1",
     "postcss-loader": "^3.0.0",
+    "sass-loader": "^8.0.2",
     "style-loader": "^0.23.1",
     "ts-loader": "^6.2.2",
     "typescript": "^3.8.3",

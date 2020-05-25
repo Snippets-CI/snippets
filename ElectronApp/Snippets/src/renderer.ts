@@ -5,34 +5,79 @@
  *
  * https://electronjs.org/docs/tutorial/application-architecture#main-and-renderer-processes
  *
- * By default, Node.js integration in this file is disabled. When enabling Node.js integration
- * in a renderer process, please be aware of potential security implications. You can read
- * more about security risks here:
- *
- * https://electronjs.org/docs/tutorial/security
- *
- * To enable Node.js integration in this file, open up `main.js` and enable the `nodeIntegration`
- * flag:
- *
- * ```
- *  // Create the browser window.
- *  mainWindow = new BrowserWindow({
- *    width: 800,
- *    height: 600,
- *    webPreferences: {
- *      nodeIntegration: true
- *    }
- *  });
- * ```
  */
 
 import "./index.css";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap';
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap";
 import 'bootstrap-select'
 import 'bootstrap-select/dist/css/bootstrap-select.min.css'
 import axios from "axios";
 import * as monaco from "monaco-editor";
+
+const languages = [
+  "abap",
+  "apex",
+  "azcli",
+  "bat",
+  "cameligo",
+  "clojure",
+  "coffee",
+  "cpp",
+  "csharp",
+  "csp",
+  "css",
+  "dockerfile",
+  "fsharp",
+  "go",
+  "graphql",
+  "handlebars",
+  "html",
+  "ini",
+  "java",
+  "javascript",
+  "json",
+  "kotlin",
+  "less",
+  "lua",
+  "markdown",
+  "mips",
+  "msdax",
+  "mysql",
+  "objective-c",
+  "pascal",
+  "pascaligo",
+  "perl",
+  "pgsql",
+  "php",
+  "postiats",
+  "powerquery",
+  "powershell",
+  "pug",
+  "python",
+  "r",
+  "razor",
+  "redis",
+  "redshift",
+  "restructuredtext",
+  "ruby",
+  "rust",
+  "sb",
+  "scheme",
+  "scss",
+  "shell",
+  "solidity",
+  "sophia",
+  "sql",
+  "st",
+  "swift",
+  "tcl",
+  "twig",
+  "typescript",
+  "vb",
+  "xml",
+  "yaml",
+];
 
 /*
 axios.get("https://api.github.com/users/mapbox").then((response) => {
@@ -43,38 +88,65 @@ axios.get("https://api.github.com/users/mapbox").then((response) => {
   console.log(response.config);
 });*/
 
-const model = monaco.editor.createModel(
-  ["function x() {", '\tconsole.log("Hello world!");', "}"].join("\n"),
-  "javascript"
-);
-
-const editor = monaco.editor.create(document.getElementById("monaco-container"), {
-  theme: "vs-dark",
-  scrollBeyondLastLine: false
-});
-
-editor.setModel(model);
-
-const myBinding = editor.addCommand(
-  monaco.KeyMod.CtrlCmd | monaco.KeyCode.F10,
-  function () {
-    alert("CTRL + F10 pressed!");
+const editor = monaco.editor.create(
+  document.getElementById("monaco-container"),
+  {
+    theme: "vs-dark",
+    scrollBeyondLastLine: false,
   }
 );
 
-function updateDimensions() {
+const model = monaco.editor.createModel("function () {}", "javascript");
+const selector = document.getElementById(
+  "languageSelector"
+) as HTMLSelectElement;
+
+function updateDimensions(): void {
   editor.layout();
 }
 
-window.addEventListener("resize", updateDimensions.bind(this));
+function initializeMonacoEditor(): void {
+  editor.setModel(model);
 
+  // Add bindings
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const myBinding = editor.addCommand(
+    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S,
+    function () {
+      alert("CTRL + S pressed! Save work");
+    }
+  );
 
-function componentWillUnmount() {
-  window.removeEventListener("resize", updateDimensions.bind(this));
+  editor.layout();
 }
 
-editor.layout();
+function loadLanguages(): void {
+  let count = 0;
 
-console.log(
-  '👋 This message is being logged by "renderer.js", included via webpack'
-);
+  for (const language of languages) {
+    const opt = document.createElement("option");
+    opt.value = count.toString();
+    opt.text = language;
+
+    selector.appendChild(opt);
+    count += 1;
+  }
+
+  selector.addEventListener("change", function () {
+    const language = languages[parseInt(selector.value)];
+
+    monaco.editor.setModelLanguage(model, language);
+    console.log(language);
+  });
+
+  // manually set selected language for now
+  selector.selectedIndex = languages.indexOf("javascript");
+}
+
+window.addEventListener("resize", updateDimensions.bind(this));
+window.onclose = function (): void {
+  window.removeEventListener("resize", updateDimensions.bind(this));
+};
+
+initializeMonacoEditor();
+loadLanguages();
