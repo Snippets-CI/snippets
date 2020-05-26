@@ -24,3 +24,6 @@ Build an .exe file:
 
 Run:
 > go run main.go strings.go domain.go
+
+Run tests:  
+> go test -v
