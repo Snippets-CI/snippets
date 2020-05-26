@@ -95,6 +95,7 @@ Installation:
 > npm install monaco-editor  
 > npm install monaco-editor-webpack-plugin
 > npm install file-loader --save-dev
+> npm install css-loader --save-dev 
 
 In `webpack.plugin.js` add the plugin:  
 
