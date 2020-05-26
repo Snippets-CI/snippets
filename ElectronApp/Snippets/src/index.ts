@@ -3,7 +3,6 @@ import path from "path";
 import url from "url";
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
-declare const LOGIN_WINDOW_WEBPACK_ENTRY: any;
 declare const SPLASH_WINDOW_WEBPACK_ENTRY: any;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -26,13 +25,6 @@ const createWindow = () => {
     height: 800,
     width: 1200,
   });
-
-  /*loginChildView = new BrowserWindow({
-    parent: mainWindow,
-    height: 400,
-    width: 800,
-    frame: false,
-  });*/
 
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 

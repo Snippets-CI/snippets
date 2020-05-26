@@ -18,6 +18,8 @@ import * as monaco from "monaco-editor";
 import * as snippet from "./dto/snippetDto";
 import * as user from "./dto/userDto";
 
+import $ from "jquery";
+
 /* ********************
  * Declarations
  * ********************/
@@ -237,13 +239,41 @@ function loadUser(): void {
     });
 }
 
+
+
+
+function addLoginListener(): void {
+  $("#loginBtn").click(() => {
+
+    loadMainApplication()
+    $('#loginModal').modal('hide').data('#loginModal', null);
+  });
+
+  $("#registerBtn").click(() => {
+
+    loadMainApplication();
+    $('#loginModal').modal('hide').data('#loginModal', null);
+  });
+}
+
+function loadMainApplication():void {
+  initializeMonacoEditor();
+  loadUser();
+  loadSnippets();
+  loadSnippet();
+}
+
+// Load Login Modal on start up
+$(window).on('load',function(){
+  $('#loginModal').modal('show');
+});
+
+
 window.addEventListener("resize", updateDimensions.bind(this));
 window.onclose = function (): void {
   window.removeEventListener("resize", updateDimensions.bind(this));
 };
 
-initializeMonacoEditor();
+addLoginListener();
 loadLanguages();
-loadUser();
-loadSnippets();
-loadSnippet();
+
