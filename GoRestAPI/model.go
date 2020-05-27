@@ -5,6 +5,8 @@ import (
 )
 
 // Snippet from DB
+// HTTP status code 200 and repository model in data
+// swagger:response Snippet
 type Snippet struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`
@@ -14,6 +16,8 @@ type Snippet struct {
 }
 
 // User from DB
+// HTTP status code 200 and repository model in data
+// swagger:response User
 type User struct {
 	ID       string    `json:"user_id"`
 	Name     string    `json:"name"`

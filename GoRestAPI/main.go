@@ -1,18 +1,26 @@
 // Snippets
 //
-// The purpose of this application is to serve Snippets
+// the purpose of this application is to provide an application
+// that is using plain go to serve a rest api
 //
-//     Schemes: http
-//     Host: localhost:8010
+//
+// Terms Of Service:
+// there are no TOS at this moment, use at your own risk we take no responsibility
+//
+//     Schemes: http, https
+//     Host: localhost
+//     BasePath: /
 //     Version: 0.0.1
 //     License: MIT http://opensource.org/licenses/MIT
-//     Contact: Andreas | Markus <andi.roither@protonmail.com>
+//     Contact: Roither | Seiberl <andi.roither@protonmail.com>
 //
 //     Consumes:
-//     - text/plain
+//     - application/json
+//     - application/xml
 //
 //     Produces:
-//     - text/plain
+//     - application/json
+//     - application/xml
 //
 // swagger:meta
 //go:generate swagger generate spec

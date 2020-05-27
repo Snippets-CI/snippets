@@ -1,6 +1,33 @@
 {
+  "consumes": [
+    "application/json",
+    "application/xml"
+  ],
+  "produces": [
+    "application/json",
+    "application/xml"
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
   "swagger": "2.0",
-  "info": {},
+  "info": {
+    "description": "the purpose of this application is to provide an application\nthat is using plain go to serve a rest api",
+    "title": "Snippets",
+    "termsOfService": "there are no TOS at this moment, use at your own risk we take no responsibility",
+    "contact": {
+      "name": "Roither | Seiberl",
+      "email": "andi.roither@protonmail.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "http://opensource.org/licenses/MIT"
+    },
+    "version": "0.0.1"
+  },
+  "host": "localhost",
+  "basePath": "/",
   "paths": {
     "/users/{userID}/snippets/{snippetID}": {
       "get": {
@@ -28,8 +55,44 @@
         ],
         "responses": {
           "200": {
-            "description": "snippet response"
+            "$ref": "#/responses/Snippet"
           }
+        }
+      }
+    }
+  },
+  "responses": {
+    "Snippet": {
+      "description": "Snippet from DB\nHTTP status code 200 and repository model in data",
+      "headers": {
+        "about": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "lang": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "User": {
+      "description": "User from DB\nHTTP status code 200 and repository model in data",
+      "headers": {
+        "name": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
         }
       }
     }
