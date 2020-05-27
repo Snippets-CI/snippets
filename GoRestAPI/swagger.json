@@ -1,0 +1,37 @@
+{
+  "swagger": "2.0",
+  "info": {},
+  "paths": {
+    "/users/{userID}/snippets/{snippetID}": {
+      "get": {
+        "description": "Returns a snippet from a user",
+        "consumes": [
+          "text/plain"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "operationId": "getUserSnippet",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "user id for user selection",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "snippet id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "snippet response"
+          }
+        }
+      }
+    }
+  }
+}
