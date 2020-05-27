@@ -87,6 +87,7 @@
     "eslint-plugin-import": "^2.20.2",
     "file-loader": "^6.0.0",
     "fork-ts-checker-webpack-plugin": "^3.1.1",
+    "jquery": "^3.5.1",
     "mini-css-extract-plugin": "^0.9.0",
     "node-loader": "^0.6.0",
     "node-sass": "^4.14.1",
@@ -104,7 +105,6 @@
     "bootstrap": "^4.4.1",
     "bootstrap-select": "^1.13.17",
     "electron-squirrel-startup": "^1.0.0",
-    "jquery": "^3.5.1",
     "monaco-editor": "^0.20.0",
     "monaco-editor-webpack-plugin": "^1.9.0",
     "popper.js": "^1.16.1"

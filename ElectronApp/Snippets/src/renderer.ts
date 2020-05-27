@@ -195,8 +195,8 @@ function loadSnippets(): void {
         }
       }
     })
-    .catch(error => {
-      console.log('Error while loading snippets: ', error);
+    .catch((error) => {
+      console.log("Error while loading snippets: ", error);
     });
 }
 
@@ -216,8 +216,8 @@ function loadSnippet(): void {
           response.data.name;
       }
     })
-    .catch(error => {
-      console.log('Error while loading snippet: ', error);
+    .catch((error) => {
+      console.log("Error while loading snippet: ", error);
     });
 }
 
@@ -234,40 +234,34 @@ function loadUser(): void {
           "Hi " + response.data.name;
       }
     })
-    .catch(error => {
-      console.log('Error while loading user: ', error);
+    .catch((error) => {
+      console.log("Error while loading user: ", error);
     });
 }
 
-
-
-
-function addLoginListener(): void {
-  $("#loginBtn").click(() => {
-
-    loadMainApplication()
-    $('#loginModal').modal('hide').data('#loginModal', null);
-  });
-
-  $("#registerBtn").click(() => {
-
-    loadMainApplication();
-    $('#loginModal').modal('hide').data('#loginModal', null);
-  });
-}
-
-function loadMainApplication():void {
+function loadMainApplication(): void {
   initializeMonacoEditor();
   loadUser();
   loadSnippets();
   loadSnippet();
 }
 
-// Load Login Modal on start up
-$(window).on('load',function(){
-  $('#loginModal').modal('show');
-});
+function addLoginListener(): void {
+  $("#loginBtn").click(() => {
+    loadMainApplication();
+    $("#loginModal").modal("hide").data("#loginModal", null);
+  });
 
+  $("#registerBtn").click(() => {
+    loadMainApplication();
+    $("#loginModal").modal("hide").data("#loginModal", null);
+  });
+}
+
+// Load Login Modal on start up
+$(window).on("load", function () {
+  $("#loginModal").modal("show");
+});
 
 window.addEventListener("resize", updateDimensions.bind(this));
 window.onclose = function (): void {
@@ -276,4 +270,3 @@ window.onclose = function (): void {
 
 addLoginListener();
 loadLanguages();
-

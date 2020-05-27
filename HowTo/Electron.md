@@ -25,6 +25,9 @@ Start:
 Installation:  
 > npm install --save-dev babel-loader @babel/core  
 > npm install --save-dev @babel/preset-typescript
+> npm install jquery --save-dev
+> npm install -D @types/bootstrap
+> npm install @types/jquery
 
 In `webpack.rules.js` add another rule:
 ```typescript
