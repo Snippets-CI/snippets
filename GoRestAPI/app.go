@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -24,7 +25,6 @@ type App struct {
 // Initialize app and connect to db
 func (a *App) Initialize(user, password, dbname string) {
 	fmt.Println("[*] Initialize...")
-	createMockData()
 
 	connectionString :=
 		fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", user, password, dbname)
@@ -36,7 +36,12 @@ func (a *App) Initialize(user, password, dbname string) {
 	}
 
 	a.Router = chi.NewRouter()
+	a.Router.Use(middleware.RequestID)
+	a.Router.Use(middleware.RealIP)
 	a.Router.Use(middleware.Logger)
+	a.Router.Use(middleware.Recoverer)
+
+	a.Router.Use(middleware.Timeout(60 * time.Second))
 
 	a.initializeRoutes()
 }
@@ -64,30 +69,28 @@ func (a *App) initializeRoutes() {
 		r.Get("/", getWelcomeMessage)
 	})
 
-	a.Router.Route("/swagger", func(r chi.Router) {
-		r.Get("/", serveSwagger)
-	})
-
 	a.Router.Route("/login", func(r chi.Router) {
-		r.Post("/", loginUser)
+		r.Post("/", a.login)
 	})
 
 	// route: /users
-	a.Router.Route("/users", func(r chi.Router) {
-		r.Get("/", getUsers)
+	a.Router.Route("/user", func(r chi.Router) {
+		r.Post("/", a.createUser)
+		r.Put("/", a.updateUser)
 
 		// route: /users/{userID}
 		r.Route("/{userID}", func(r chi.Router) {
-			r.Get("/", getUserDetails)
 
 			// route: /users/{userID}/snippets
 			r.Route("/snippets", func(r chi.Router) {
-				r.Get("/", getUserSnippets)
+				r.Get("/", a.getSnippets)
+				r.Post("/", a.createSnippet)
 
 				// route: /users/{userID}/snippets/{snippetID}
 				r.Route("/{snippetID}", func(r chi.Router) {
-					r.Get("/", getUserSnippetDetails)
-					r.Post("/", putUserSnippetDetails)
+					r.Get("/", a.getSnippet)
+					r.Put("/", a.updateSnippet)
+					r.Delete("/", a.deleteSnippet)
 				})
 			})
 		})
@@ -106,11 +109,6 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.Write(response)
 }
 
-func serveSwagger(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	http.ServeFile(w, r, "swagger.json")
-}
-
 // ---------------
 // ---------------
 // ---------------
@@ -119,17 +117,215 @@ func serveSwagger(w http.ResponseWriter, r *http.Request) {
 // ---------------
 // ---------------
 
+func getWelcomeMessage(w http.ResponseWriter, r *http.Request) {
+	// swagger:operation GET /
+	//
+	// Returns a welcome
+	// ---
+	// produces:
+	// - application/json
+	// responses:
+	//   '200':
+	//     description: welcome message :)
+
+	respondWithJSON(w, http.StatusOK, WelcomeMessage)
+}
+
+func (a *App) login(w http.ResponseWriter, r *http.Request) {
+	// swagger:operation POST /login login
+	//
+	// Returns a user for provided email and jwt
+	// ---
+	// produces:
+	// - application/json
+	// parameters:
+	// - mail: userMail
+	//   in: body
+	//   description: user id for user selection
+	//   required: true
+	//   type: string
+	// - authToken: jwt
+	//   in: header
+	//   description: web token from user authentication
+	//   required: true
+	//   type: string
+	// responses:
+	//   '200':
+	//     schema:
+	//     "$ref": "#/responses/User"
+	//     type: json
+	//   '404':
+	//      description: no user with that mail found
+	//   '401':
+	//      description: authorization failed
+
+	user := User{}
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&user); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+	defer r.Body.Close()
+
+	// TODO: check jwt
+	// for now it returns a user for a certain email
+
+	if err := user.getUser(a.DB); err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			respondWithError(w, http.StatusNotFound, err.Error())
+		default:
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+		}
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, user)
+}
+
+func (a *App) createUser(w http.ResponseWriter, r *http.Request) {
+	// swagger:operation PUT /user
+	//
+	// Create and returns user
+	// ---
+	// produces:
+	// - application/json
+	// parameters:
+	// - mail: userMail
+	//   in: body
+	//   description: new mail for user
+	//   required: true
+	//   type: string
+	// - name: userName
+	//   in: body
+	//   description: new name for user
+	//   required: true
+	//   type: string
+	// - password: userPassword
+	//   in: body
+	//   description: new password for user
+	//   required: true
+	//   type: string
+	// responses:
+	//   '200':
+	//      description: user created
+
+	user := User{}
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&user); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+	defer r.Body.Close()
+
+	if err := user.createUser(a.DB); err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	respondWithJSON(w, http.StatusCreated, user)
+}
+
+func (a *App) updateUser(w http.ResponseWriter, r *http.Request) {
+	// swagger:operation PUT /user
+	//
+	// Updates and returns user
+	// ---
+	// produces:
+	// - application/json
+	// parameters:
+	// - userID: userId
+	//   in: path
+	//   description: user id for user selection
+	//   required: true
+	//   type: string
+	// - mail: userMail
+	//   in: body
+	//   description: new mail for user
+	//   required: true
+	//   type: string
+	// - name: userName
+	//   in: body
+	//   description: new name for user
+	//   required: true
+	//   type: string
+	// - authToken: jwt
+	//   in: body
+	//   description: authorization token
+	//   required: true
+	//   type: string
+	// responses:
+	//   '200':
+	//      description: user updated
+	//   '404':
+	//      description: no user with that id found
+	//   '401':
+	//      description: authorization failed
+
+	user := User{}
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&user); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+	defer r.Body.Close()
+
+	if err := user.updateUser(a.DB); err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, user)
+}
+
 func (a *App) getSnippet(w http.ResponseWriter, r *http.Request) {
+	// swagger:operation GET /user/{userID}/snippets/{snippetID} getSnippet
+	//
+	// Returns a snippet for a given user and snippet id
+	// ---
+	// produces:
+	// - application/json
+	// parameters:
+	// - userID: userId
+	//   in: path
+	//   description: user id for snippet selection
+	//   required: true
+	//   type: string
+	// - snippetID: snippetId
+	//   in: path
+	//   description: snippet which should be retrieved
+	//   required: true
+	//   type: string
+	// - authToken: jwt
+	//   in: header
+	//   description: authorization token
+	//   required: true
+	//   type: string
+	// responses:
+	//   '200':
+	//      description: a snippet to be returned
+	//      schema:
+	//      $ref: '#/responses/Snippet'
+	//   '404':
+	//      description: no snippet with that id found
+	//   '401':
+	//      description: authorization failed
+
+	userID := chi.URLParam(r, "userID")
 	val := chi.URLParam(r, "snippetID")
 
 	_, err := strconv.Atoi(val)
+
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid product ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid snippet id")
 		return
 	}
 
 	p := Snippet{ID: val}
-	if err := p.getSnippet(a.DB); err != nil {
+	if err := p.getSnippet(a.DB, userID); err != nil {
 		switch err {
 		case sql.ErrNoRows:
 			respondWithError(w, http.StatusNotFound, "Snippet not found")
@@ -142,191 +338,245 @@ func (a *App) getSnippet(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, p)
 }
 
-// ---------------
-// ---------------
-// ---------------
-// MOCKUP
-// ---------------
-// ---------------
-// ---------------
-
-var users = []User{}
-
-// Creates Mockdata which in future we will get from the database
-func createMockData() {
-	snippet1 := Snippet{`1`, `Hello world simple`, `java`, `stdout`, `System.out.println("Hello World");`}
-	snippet2 := Snippet{`2`, `struct`, `go`, `structure`, `type User struct {\n    name string\n    lastname string\n    age int\n} `}
-	snippet3 := Snippet{`3`, `Hello World Python`, `python`, `stdout`, `print("Hello World from Go Rest API")`}
-	snippet4 := Snippet{`4`, `Car`, `javascript`, `objects`, `var car = {\n    type:"Fiat",\n    model:"500",\n     color:"white"\n};`}
-
-	user1Snippets := []Snippet{snippet1, snippet2}
-	user2Snippets := []Snippet{snippet3, snippet4}
-
-	users = append(users, User{"0", "Andreas", "asdf", user1Snippets})
-	users = append(users, User{"1", "Markus", "1234", user2Snippets})
-}
-
-func getUser(userID string) User {
-	for _, user := range users {
-		if user.ID == userID {
-			return user
-		}
-	}
-	return User{}
-}
-
-func getUserSnippet(user User, snippetID string) Snippet {
-	// swagger:operation GET /users/{userID}/snippets/{snippetID} getUserSnippet
+func (a *App) createSnippet(w http.ResponseWriter, r *http.Request) {
+	// swagger:operation POST /user/{userID}/snippets/ createSnippet
 	//
-	// Returns a snippet from a user
+	// Create a snippet with a given id
 	// ---
-	// consumes:
-	// - text/plain
 	// produces:
 	// - application/json
 	// parameters:
-	// - userID: user id
+	// - userID: userId
 	//   in: path
-	//   description: user id for user selection
+	//   description: user id for snippet selection
 	//   required: true
 	//   type: string
-	// - snippetID: snippet id
-	//   in: path
-	//   description: snippet id
+	// - authToken: jwt
+	//   in: header
+	//   description: authorization token
 	//   required: true
+	//   type: string
+	// - id: snippetID
+	//   in: body
+	//   description: snippet id
+	//   type: string
+	// - name: name
+	//   in: body
+	//   description: snippet name
+	//   type: string
+	// - lang: snippetLang
+	//   in: body
+	//   description: snippet language
+	//   type: string
+	// - about: snippetAbout
+	//   in: body
+	//   description: snippet description
+	//   type: string
+	// - code: snippetCode
+	//   in: body
+	//   description: snippet code text
 	//   type: string
 	// responses:
 	//   '200':
-	//     "$ref": "#/responses/Snippet"
-	//     type: json
-	for _, snippet := range user.Snippets {
-		if snippet.ID == snippetID {
-			return snippet
+	//      description: an updated snippet to be returned
+	//      schema:
+	//      $ref: '#/responses/Snippet'
+	//   '404':
+	//      description: no snippet with that id found
+	//   '401':
+	//      description: authorization failed
+
+	//userID := chi.URLParam(r, "userID")
+
+	snippet := Snippet{}
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&snippet); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload "+err.Error())
+		return
+	}
+	defer r.Body.Close()
+
+	if err := snippet.createSnippet(a.DB); err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			respondWithError(w, http.StatusNotFound, "Snippet not found")
+		default:
+			respondWithError(w, http.StatusInternalServerError, err.Error())
 		}
-	}
-	return Snippet{}
-}
-
-func swagger(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	http.ServeFile(w, r, "swagger.json")
-}
-
-// GET - Request
-// Outputs Welcome Msg
-func getWelcomeMessage(w http.ResponseWriter, r *http.Request) {
-	respondWithJSON(w, http.StatusOK, WelcomeMessage)
-}
-
-// GET - Request
-// Outputs all available names of users
-func getUsers(w http.ResponseWriter, r *http.Request) {
-	availableUsers := []string{}
-
-	for _, user := range users {
-		availableUsers = append(availableUsers, user.Name)
+		return
 	}
 
-	respondWithJSON(w, http.StatusOK, availableUsers)
+	respondWithJSON(w, http.StatusCreated, snippet)
 }
 
-// GET - Request
-// Outputs the requested user as json
-func getUserDetails(w http.ResponseWriter, r *http.Request) {
-	userID := chi.URLParam(r, "userID")
+func (a *App) updateSnippet(w http.ResponseWriter, r *http.Request) {
+	// swagger:operation PUT /user/{userID}/snippets/{snippetID} updateSnippet
+	//
+	// Update a snippet with a given id
+	// ---
+	// produces:
+	// - application/json
+	// parameters:
+	// - userID: userId
+	//   in: path
+	//   description: user id for snippet selection
+	//   required: true
+	//   type: string
+	// - id: snippetID
+	//   in: path
+	//   description: snippet id
+	//   type: string
+	// - authToken: jwt
+	//   in: header
+	//   description: authorization token
+	//   required: true
+	//   type: string
+	// - name: name
+	//   in: body
+	//   description: snippet name
+	//   type: string
+	// - lang: snippetLang
+	//   in: body
+	//   description: snippet language
+	//   type: string
+	// - about: snippetAbout
+	//   in: body
+	//   description: snippet description
+	//   type: string
+	// - code: snippetCode
+	//   in: body
+	//   description: snippet code text
+	//   type: string
+	// responses:
+	//   '200':
+	//      description: an updated snippet to be returned
+	//      schema:
+	//      $ref: '#/responses/Snippet'
+	//   '404':
+	//      description: no snippet with that id found
+	//   '401':
+	//      description: authorization failed
 
-	user := getUser(userID)
-	respondWithJSON(w, http.StatusOK, user)
-
-}
-
-// GET - Request
-// Outputs all saved Snippets of a user
-func getUserSnippets(w http.ResponseWriter, r *http.Request) {
-	userID := chi.URLParam(r, "userID")
-
-	user := getUser(userID)
-	respondWithJSON(w, http.StatusOK, user.Snippets)
-}
-
-// GET - Request
-// Outputs the requested snipped of a user
-func getUserSnippetDetails(w http.ResponseWriter, r *http.Request) {
-	userID := chi.URLParam(r, "userID")
+	//userID := chi.URLParam(r, "userID")
 	snippetID := chi.URLParam(r, "snippetID")
 
-	user := getUser(userID)
-	snippet := getUserSnippet(user, snippetID)
+	// TODO: check if user id checks out with authorization
+
+	snippet := Snippet{}
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&snippet); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+	defer r.Body.Close()
+
+	snippet.ID = snippetID
+
+	if err := snippet.updateSnippet(a.DB); err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			respondWithError(w, http.StatusNotFound, "Snippet not found")
+		default:
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+		}
+		return
+	}
 
 	respondWithJSON(w, http.StatusOK, snippet)
 }
 
-// PUT - Request
-// Updates a snippet of a user
-func putUserSnippetDetails(w http.ResponseWriter, r *http.Request) {
-	userID := chi.URLParam(r, "userID")
-	snippetID := chi.URLParam(r, "snippetID")
-	snippetString := chi.URLParam(r, "snippet")
-	snippet := Snippet{}
-	err := json.Unmarshal([]byte(snippetString), &snippet)
+func (a *App) deleteSnippet(w http.ResponseWriter, r *http.Request) {
+	// swagger:operation DELETE /user/{userID}/snippets/{snippetID} deleteSnippet
+	//
+	// Deletes a snippet for a given id
+	// ---
+	// produces:
+	// - application/json
+	// parameters:
+	// - userID: userId
+	//   in: path
+	//   description: user id for snippet selection
+	//   required: true
+	//   type: string
+	// - snippetID: snippetId
+	//   in: path
+	//   description: snippet which should be deleted
+	//   required: true
+	//   type: string
+	// - authToken: jwt
+	//   in: header
+	//   description: authorization token
+	//   required: true
+	//   type: string
+	// responses:
+	//   '200':
+	//      description: result success
+	//   '404':
+	//      description: no snippet with that id found
+	//   '401':
+	//      description: authorization failed
 
-	fmt.Println(r.Context().Value("snippet"))
-	fmt.Println(userID + " - " + snippetID + " - " + snippetString)
+	//userID := chi.URLParam(r, "userID")
+	val := chi.URLParam(r, "snippetID")
+
+	// TODO: check if user id checks out with authorization
+
+	_, err := strconv.Atoi(val)
 
 	if err != nil {
-		json.NewEncoder(w).Encode(ErrorMessage)
+		respondWithError(w, http.StatusBadRequest, "Invalid snippet id")
+		return
 	}
 
-	fmt.Println(snippet)
+	p := Snippet{ID: val}
+	if err := p.deleteSnippet(a.DB); err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
 }
 
-// POST - Reqest
-// Authenticates user
+func (a *App) getSnippets(w http.ResponseWriter, r *http.Request) {
+	// swagger:operation GET /user/{userID}/snippets/ getSnippets
+	//
+	// Returns all snippets for a user
+	// ---
+	// produces:
+	// - application/json
+	// parameters:
+	// - userID: userId
+	//   in: path
+	//   description: user id for snippet selection
+	//   required: true
+	//   type: string
+	// - authToken: jwt
+	//   in: header
+	//   description: authorization token
+	//   required: true
+	//   type: string
+	// responses:
+	//   '200':
+	//     description: HTTP status code 200 and Snippets
+	//     schema:
+	//       type: array
+	//       items:
+	//         "$ref": "#/responses/Snippet"
+	//   '404':
+	//     description: no user(user) with that id found
+	//   '401':
+	//     description: authorization failed
 
-func loginUser(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "userID")
 
-	dbUserName, dbPassword := getUserCredentialsDB()
+	user := User{ID: id}
 
-	dec := json.NewDecoder(r.Body)
-	dec.DisallowUnknownFields()
-
-	var credentials LoginCredentials
-	err := dec.Decode(&credentials)
-
-	if err != nil {
-		json.NewEncoder(w).Encode(ErrorMessageMalformedJSON)
+	if err := user.getSnippets(a.DB); err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
 	}
 
-	fmt.Println("########")
-	fmt.Println(dbUserName)
-	fmt.Println(dbPassword)
-}
-
-func getUserCredentialsDB() (string, string) {
-	// Quick and Dirty
-	// Should be refactored
-	db, err := sql.Open("postgres",
-		"postgresql://restapi@localhost:5432/snippet?sslmode=disable")
-	if err != nil {
-		log.Fatal("error connecting to the database: ", err)
-	}
-
-	//TODO update selcet query and handle response
-	rows, err := db.Query("SELECT username, password FROM users")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	//Close after for loop
-	defer rows.Close()
-
-	for rows.Next() {
-		var username, password string
-		if err := rows.Scan(&username, &password); err != nil {
-			log.Fatal(err)
-		}
-		return username, password
-	}
-
-	return "sdf", "asfd"
+	respondWithJSON(w, http.StatusOK, user.Snippets)
 }

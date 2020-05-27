@@ -29,33 +29,273 @@
   "host": "localhost",
   "basePath": "/",
   "paths": {
-    "/users/{userID}/snippets/{snippetID}": {
-      "get": {
-        "description": "Returns a snippet from a user",
-        "consumes": [
-          "text/plain"
-        ],
+    "/login": {
+      "post": {
+        "description": "Returns a user for provided email and jwt",
         "produces": [
           "application/json"
         ],
-        "operationId": "getUserSnippet",
+        "operationId": "login",
         "parameters": [
           {
             "type": "string",
             "description": "user id for user selection",
+            "in": "body",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "web token from user authentication",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/User"
+          },
+          "401": {
+            "description": "authorization failed"
+          },
+          "404": {
+            "description": "no user with that mail found"
+          }
+        }
+      }
+    },
+    "/user/{userID}/snippets/": {
+      "get": {
+        "description": "Returns all snippets for a user",
+        "produces": [
+          "application/json"
+        ],
+        "operationId": "getSnippets",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "user id for snippet selection",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "authorization token",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "HTTP status code 200 and Snippets",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/responses/Snippet"
+              }
+            }
+          },
+          "401": {
+            "description": "authorization failed"
+          },
+          "404": {
+            "description": "no user(user) with that id found"
+          }
+        }
+      },
+      "post": {
+        "description": "Create a snippet with a given id",
+        "produces": [
+          "application/json"
+        ],
+        "operationId": "createSnippet",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "user id for snippet selection",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "authorization token",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "snippet id",
+            "in": "body"
+          },
+          {
+            "type": "string",
+            "description": "snippet name",
+            "name": "name",
+            "in": "body"
+          },
+          {
+            "type": "string",
+            "description": "snippet language",
+            "in": "body"
+          },
+          {
+            "type": "string",
+            "description": "snippet description",
+            "in": "body"
+          },
+          {
+            "type": "string",
+            "description": "snippet code text",
+            "in": "body"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "an updated snippet to be returned",
+            "$ref": "#/responses/Snippet"
+          },
+          "401": {
+            "description": "authorization failed"
+          },
+          "404": {
+            "description": "no snippet with that id found"
+          }
+        }
+      }
+    },
+    "/user/{userID}/snippets/{snippetID}": {
+      "get": {
+        "description": "Returns a snippet for a given user and snippet id",
+        "produces": [
+          "application/json"
+        ],
+        "operationId": "getSnippet",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "user id for snippet selection",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "snippet which should be retrieved",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "authorization token",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "a snippet to be returned",
+            "$ref": "#/responses/Snippet"
+          },
+          "401": {
+            "description": "authorization failed"
+          },
+          "404": {
+            "description": "no snippet with that id found"
+          }
+        }
+      },
+      "put": {
+        "description": "Update a snippet with a given id",
+        "produces": [
+          "application/json"
+        ],
+        "operationId": "updateSnippet",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "user id for snippet selection",
             "in": "path",
             "required": true
           },
           {
             "type": "string",
             "description": "snippet id",
+            "in": "path"
+          },
+          {
+            "type": "string",
+            "description": "authorization token",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "snippet name",
+            "name": "name",
+            "in": "body"
+          },
+          {
+            "type": "string",
+            "description": "snippet language",
+            "in": "body"
+          },
+          {
+            "type": "string",
+            "description": "snippet description",
+            "in": "body"
+          },
+          {
+            "type": "string",
+            "description": "snippet code text",
+            "in": "body"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "an updated snippet to be returned",
+            "$ref": "#/responses/Snippet"
+          },
+          "401": {
+            "description": "authorization failed"
+          },
+          "404": {
+            "description": "no snippet with that id found"
+          }
+        }
+      },
+      "delete": {
+        "description": "Deletes a snippet for a given id",
+        "produces": [
+          "application/json"
+        ],
+        "operationId": "deleteSnippet",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "user id for snippet selection",
             "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "snippet which should be deleted",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "authorization token",
+            "in": "header",
             "required": true
           }
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/Snippet"
+            "description": "result success"
+          },
+          "401": {
+            "description": "authorization failed"
+          },
+          "404": {
+            "description": "no snippet with that id found"
           }
         }
       }
@@ -63,35 +303,41 @@
   },
   "responses": {
     "Snippet": {
-      "description": "Snippet from DB\nHTTP status code 200 and repository model in data",
+      "description": "Snippet from DB\nHTTP status code 200 and Snippet",
       "headers": {
-        "about": {
+        "category": {
           "type": "string"
         },
         "code": {
           "type": "string"
         },
-        "id": {
+        "language": {
           "type": "string"
         },
-        "lang": {
+        "owner": {
           "type": "string"
         },
-        "name": {
+        "snippet_id": {
+          "type": "string"
+        },
+        "title": {
           "type": "string"
         }
       }
     },
     "User": {
-      "description": "User from DB\nHTTP status code 200 and repository model in data",
+      "description": "User from DB\nHTTP status code 200 and User",
       "headers": {
-        "name": {
+        "mail": {
           "type": "string"
         },
         "password": {
           "type": "string"
         },
         "user_id": {
+          "type": "string"
+        },
+        "username": {
           "type": "string"
         }
       }
