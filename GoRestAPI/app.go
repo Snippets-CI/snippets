@@ -64,6 +64,10 @@ func (a *App) initializeRoutes() {
 		r.Get("/", getWelcomeMessage)
 	})
 
+	a.Router.Route("/swagger", func(r chi.Router) {
+		r.Get("/", serveSwagger)
+	})
+
 	a.Router.Route("/login", func(r chi.Router) {
 		r.Post("/", loginUser)
 	})
@@ -101,6 +105,19 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.WriteHeader(code)
 	w.Write(response)
 }
+
+func serveSwagger(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	http.ServeFile(w, r, "swagger.json")
+}
+
+// ---------------
+// ---------------
+// ---------------
+// Rest API functions
+// ---------------
+// ---------------
+// ---------------
 
 func (a *App) getSnippet(w http.ResponseWriter, r *http.Request) {
 	val := chi.URLParam(r, "snippetID")
@@ -159,12 +176,40 @@ func getUser(userID string) User {
 }
 
 func getUserSnippet(user User, snippetID string) Snippet {
+	// swagger:operation GET /users/{userID}/snippets/{snippetID} getUserSnippet
+	//
+	// Returns a snippet from a user
+	// ---
+	// consumes:
+	// - text/plain
+	// produces:
+	// - application/json
+	// parameters:
+	// - userID: user id
+	//   in: path
+	//   description: user id for user selection
+	//   required: true
+	//   type: string
+	// - snippetID: snippet id
+	//   in: path
+	//   description: snippet id
+	//   required: true
+	//   type: string
+	// responses:
+	//   '200':
+	//     "$ref": "#/responses/Snippet"
+	//     type: json
 	for _, snippet := range user.Snippets {
 		if snippet.ID == snippetID {
 			return snippet
 		}
 	}
 	return Snippet{}
+}
+
+func swagger(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	http.ServeFile(w, r, "swagger.json")
 }
 
 // GET - Request
