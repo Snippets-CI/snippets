@@ -247,12 +247,23 @@ function loadMainApplication(): void {
 }
 
 function addLoginListener(): void {
+  // Handle login
   $("#loginBtn").click(() => {
+    let userName = $("#username").val();
+    let password = $("#password").val();
+
+
     loadMainApplication();
     $("#loginModal").modal("hide").data("#loginModal", null);
   });
 
+
+  // Handle Register
   $("#registerBtn").click(() => {
+    let userName = $("#username").val();
+    let password = $("#password").val();
+
+
     loadMainApplication();
     $("#loginModal").modal("hide").data("#loginModal", null);
   });
