@@ -34,7 +34,7 @@ type LoginCredentials struct {
 }
 
 func (user *User) getUser(db *sql.DB) error {
-	err := db.QueryRow("SELECT user_id, mail, username FROM users WHERE mail=$1", user.Mail).Scan(&user.ID, &user.Mail, &user.Name)
+	err := db.QueryRow(`SELECT user_id, mail, username FROM "users" WHERE mail=$1`, user.Mail).Scan(&user.ID, &user.Mail, &user.Name)
 
 	if err != nil {
 		err = user.getSnippets(db)
@@ -44,7 +44,7 @@ func (user *User) getUser(db *sql.DB) error {
 }
 
 func (user *User) createUser(db *sql.DB) error {
-	err := db.QueryRow("INSERT INTO users (mail, username, password) VALUES ($1, $2, $3) RETURNING user_id",
+	err := db.QueryRow(`INSERT INTO "users" (mail, username, password) VALUES ($1, $2, $3) RETURNING user_id`,
 		user.Mail, user.Name, user.Password).Scan(&user.ID)
 
 	if err != nil {
@@ -55,25 +55,25 @@ func (user *User) createUser(db *sql.DB) error {
 }
 
 func (user *User) updateUser(db *sql.DB) error {
-	_, err := db.Exec("UPDATE users SET mail=$1, username=$2 WHERE user_id=$3", user.Mail, user.Name, user.ID)
+	_, err := db.Exec(`UPDATE "users" SET mail=$1, username=$2 WHERE user_id=$3`, user.Mail, user.Name, user.ID)
 
 	return err
 }
 
-func (s *Snippet) getSnippet(db *sql.DB, userID string) error {
-	return db.QueryRow("SELECT id, language, title, code, category FROM Snipppets WHERE snippet_id=$1 AND owner=$2",
-		s.ID, userID).Scan(&s.ID, &s.Lang, &s.Title, &s.Code, &s.Category)
+func (s *Snippet) getSnippet(db *sql.DB) error {
+	return db.QueryRow(`SELECT language, title, code, category FROM "snippets" WHERE snippet_id=$1 AND owner=$2`,
+		s.ID, s.Owner).Scan(&s.Lang, &s.Title, &s.Code, &s.Category)
 }
 
 func (s *Snippet) updateSnippet(db *sql.DB) error {
-	_, err := db.Exec("UPDATE snippets SET title=$1, language=$2m, category=$3 code=$4 WHERE snippet_id=$5",
+	_, err := db.Exec(`UPDATE "snippets" SET title=$1, language=$2m, category=$3 code=$4 WHERE snippet_id=$5`,
 		s.Title, s.Lang, s.Category, s.Code, s.ID)
 
 	return err
 }
 
 func (s *Snippet) createSnippet(db *sql.DB) error {
-	err := db.QueryRow("INSERT INTO snippets(owner, title, language, category, code) VALUES($1, $2, $3, $4, $5) RETURNING snippet_id",
+	err := db.QueryRow(`INSERT INTO "snippets"(owner, title, language, category, code) VALUES($1, $2, $3, $4, $5) RETURNING snippet_id`,
 		s.Owner, s.Title, s.Lang, s.Category, s.Code).Scan(&s.ID)
 
 	if err != nil {
@@ -84,7 +84,7 @@ func (s *Snippet) createSnippet(db *sql.DB) error {
 }
 
 func (s *Snippet) deleteSnippet(db *sql.DB) error {
-	_, err := db.Exec("DELETE FROM snippets WHERE snippet_id=$1", s.ID)
+	_, err := db.Exec(`DELETE FROM "snippets" WHERE snippet_id=$1`, s.ID)
 	return err
 }
 
@@ -97,7 +97,7 @@ func (user *User) getSnippets(db *sql.DB) error {
 
 func getSnippets(db *sql.DB, userID string) ([]Snippet, error) {
 	rows, err := db.Query(
-		"SELECT snippet_id, language, title, category, code FROM snippets WHERE owner=$1",
+		`SELECT snippet_id, language, title, category, code FROM "snippets" WHERE owner=$1`,
 		userID)
 
 	if err != nil {

@@ -23,7 +23,7 @@ type App struct {
 }
 
 // Initialize app and connect to db
-func (a *App) Initialize(user, password, dbname string) {
+func (a *App) Initialize(user, password, dbname string, middlewareEnabled bool) {
 	fmt.Println("[*] Initialize...")
 
 	connectionString :=
@@ -36,10 +36,13 @@ func (a *App) Initialize(user, password, dbname string) {
 	}
 
 	a.Router = chi.NewRouter()
-	a.Router.Use(middleware.RequestID)
-	a.Router.Use(middleware.RealIP)
-	a.Router.Use(middleware.Logger)
-	a.Router.Use(middleware.Recoverer)
+
+	if middlewareEnabled {
+		a.Router.Use(middleware.RequestID)
+		a.Router.Use(middleware.RealIP)
+		a.Router.Use(middleware.Logger)
+		a.Router.Use(middleware.Recoverer)
+	}
 
 	a.Router.Use(middleware.Timeout(60 * time.Second))
 
@@ -317,15 +320,8 @@ func (a *App) getSnippet(w http.ResponseWriter, r *http.Request) {
 	userID := chi.URLParam(r, "userID")
 	val := chi.URLParam(r, "snippetID")
 
-	_, err := strconv.Atoi(val)
-
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid snippet id")
-		return
-	}
-
-	p := Snippet{ID: val}
-	if err := p.getSnippet(a.DB, userID); err != nil {
+	p := Snippet{ID: val, Owner: userID}
+	if err := p.getSnippet(a.DB); err != nil {
 		switch err {
 		case sql.ErrNoRows:
 			respondWithError(w, http.StatusNotFound, "Snippet not found")
