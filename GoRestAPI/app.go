@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -518,13 +517,6 @@ func (a *App) deleteSnippet(w http.ResponseWriter, r *http.Request) {
 	val := chi.URLParam(r, "snippetID")
 
 	// TODO: check if user id checks out with authorization
-
-	_, err := strconv.Atoi(val)
-
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid snippet id")
-		return
-	}
 
 	p := Snippet{ID: val}
 	if err := p.deleteSnippet(a.DB); err != nil {

@@ -66,7 +66,7 @@ func (s *Snippet) getSnippet(db *sql.DB) error {
 }
 
 func (s *Snippet) updateSnippet(db *sql.DB) error {
-	_, err := db.Exec(`UPDATE "snippets" SET title=$1, language=$2m, category=$3 code=$4 WHERE snippet_id=$5`,
+	_, err := db.Exec(`UPDATE "snippets" SET title=$1, language=$2, category=$3, code=$4 WHERE snippet_id=$5`,
 		s.Title, s.Lang, s.Category, s.Code, s.ID)
 
 	return err

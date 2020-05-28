@@ -129,74 +129,62 @@ func TestCreateUser(t *testing.T) {
 }
 
 func TestCreateSnippet(t *testing.T) {
-	bodyString := fmt.Sprintf(`{"owner":"%s", "title": "snippet1", "language": "python", "category": "Hello World", "code": "print(\"Hello World from Go Rest API\")"}`, createdUser.ID)
-	jsonStr := []byte(bodyString)
-	req, _ := http.NewRequest("POST", fmt.Sprintf(`/user/%s/snippets`, createdUser.ID), bytes.NewBuffer(jsonStr))
+	snippet1 := Snippet{Owner: createdUser.ID, Title: "snippet1", Category: "HelloWorld", Code: "print(\"Hello World from Go Rest API\")", Lang: "python"}
+
+	snippetMarshal, err := json.Marshal(snippet1)
+
+	if err != nil {
+		t.Errorf(`Error marshaling snippet`)
+	}
+
+	req, _ := http.NewRequest("POST", fmt.Sprintf(`/user/%s/snippets`, createdUser.ID), bytes.NewBuffer(snippetMarshal))
 	req.Header.Set("Content-Type", "application/json")
 
 	response := executeRequest(req)
 	checkResponseCode(t, http.StatusCreated, response.Code)
 
-	var m map[string]interface{}
-	json.Unmarshal(response.Body.Bytes(), &m)
+	snippet := Snippet{}
+	err = json.Unmarshal(response.Body.Bytes(), &snippet)
 
-	if m["owner"] != createdUser.ID {
-		t.Errorf("Expected owner to be 'createdUserID'. Got '%v'", m["owner"])
+	if err != nil {
+		t.Errorf("Error while unmarshaling: " + err.Error())
 	}
 
-	if m["title"] != "snippet1" {
-		t.Errorf("Expected snippet title to be 'snippet1'. Got '%v'", m["title"])
+	snippet1.ID = snippet.ID
+
+	if !reflect.DeepEqual(snippet, snippet1) {
+		t.Errorf("Error while deepequal, object values are not the same")
 	}
 
-	if m["language"] != "python" {
-		t.Errorf("Expected snippet language to be 'python'. Got '%v'", m["language"])
-	}
-
-	if m["category"] != "Hello World" {
-		t.Errorf("Expected snippet about to be 'Hello World'. Got '%v'", m["category"])
-	}
-
-	if m["code"] != `print("Hello World from Go Rest API")` {
-		t.Errorf(`Expected snippet about to be 'print("Hello World from Go Rest API")'. Got '%v'`, m["code"])
-	}
-
-	decoder := json.NewDecoder(response.Body)
-	if err := decoder.Decode(&createdSnippet); err != nil {
-		t.Errorf("Invalid request payload")
-		return
-	}
+	createdSnippet = snippet
 }
 
 func TestCreateSnippet2(t *testing.T) {
-	bodyString := fmt.Sprintf(`{"owner":"%s", "title": "snippet2", "language": "python", "category": "Hello World", "code": "print(\"Hello World from Go Rest API\")"}`, createdUser.ID)
-	jsonStr := []byte(bodyString)
-	req, _ := http.NewRequest("POST", fmt.Sprintf(`/user/%s/snippets`, createdUser.ID), bytes.NewBuffer(jsonStr))
+	snippet2 := Snippet{Owner: createdUser.ID, Title: "snippet2", Category: "HelloWorld", Code: "print(\"Hello World from Go Rest API\")", Lang: "python"}
+
+	snippetMarshal, err := json.Marshal(snippet2)
+
+	if err != nil {
+		t.Errorf(`Error marshaling snippet`)
+	}
+
+	req, _ := http.NewRequest("POST", fmt.Sprintf(`/user/%s/snippets`, createdUser.ID), bytes.NewBuffer(snippetMarshal))
 	req.Header.Set("Content-Type", "application/json")
 
 	response := executeRequest(req)
 	checkResponseCode(t, http.StatusCreated, response.Code)
 
-	var m map[string]interface{}
-	json.Unmarshal(response.Body.Bytes(), &m)
+	snippet := Snippet{}
+	err = json.Unmarshal(response.Body.Bytes(), &snippet)
 
-	if m["owner"] != createdUser.ID {
-		t.Errorf("Expected owner to be 'createdUserID'. Got '%v'", m["owner"])
+	if err != nil {
+		t.Errorf("Error while unmarshaling: " + err.Error())
 	}
 
-	if m["title"] != "snippet2" {
-		t.Errorf("Expected snippet title to be 'snippet2'. Got '%v'", m["title"])
-	}
+	snippet2.ID = snippet.ID
 
-	if m["language"] != "python" {
-		t.Errorf("Expected snippet language to be 'python'. Got '%v'", m["language"])
-	}
-
-	if m["category"] != "Hello World" {
-		t.Errorf("Expected snippet about to be 'Hello World'. Got '%v'", m["category"])
-	}
-
-	if m["code"] != `print("Hello World from Go Rest API")` {
-		t.Errorf(`Expected snippet about to be 'print("Hello World from Go Rest API")'. Got '%v'`, m["code"])
+	if !reflect.DeepEqual(snippet, snippet2) {
+		t.Errorf("Error while deepequal, object values are not the same")
 	}
 }
 
@@ -217,6 +205,50 @@ func TestGetSnippet(t *testing.T) {
 	if !reflect.DeepEqual(snippet, createdSnippet) {
 		t.Errorf("Error while deepequal, object values are not the same")
 	}
+}
+
+func TestUpdateSnippet(t *testing.T) {
+
+	createdSnippet.Lang = "java"
+	createdSnippet.Code = "class Changed {}"
+
+	snippetMarshal, err := json.Marshal(createdSnippet)
+
+	if err != nil {
+		t.Errorf(`Error marshaling snippet`)
+	}
+
+	req, _ := http.NewRequest("PUT", fmt.Sprintf(`/user/%s/snippets/%s`, createdUser.ID, createdSnippet.ID), bytes.NewBuffer(snippetMarshal))
+	req.Header.Set("Content-Type", "application/json")
+
+	response := executeRequest(req)
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	snippet := Snippet{}
+	err = json.Unmarshal(response.Body.Bytes(), &snippet)
+
+	if err != nil {
+		t.Errorf("Error while unmarshaling: " + err.Error())
+	}
+
+	if !reflect.DeepEqual(snippet, createdSnippet) {
+		t.Errorf("Error while deepequal, object values are not the same")
+	}
+}
+
+func TestDeleteSnippet(t *testing.T) {
+
+	req, _ := http.NewRequest("DELETE", fmt.Sprintf(`/user/%s/snippets/%s`, createdUser.ID, createdSnippet.ID), nil)
+	req.Header.Set("Content-Type", "application/json")
+
+	response := executeRequest(req)
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	req, _ = http.NewRequest("GET", fmt.Sprintf(`/user/%s/snippets/%s`, createdUser.ID, createdSnippet.ID), nil)
+	req.Header.Set("Content-Type", "application/json")
+
+	response = executeRequest(req)
+	checkResponseCode(t, http.StatusNotFound, response.Code)
 }
 
 func TestGetSnippets(t *testing.T) {
