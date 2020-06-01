@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS snippets (
 )`
 
 func TestMain(m *testing.M) {
-	a.Initialize("admin", "123", "SnippetsTest", false)
+	a.Initialize("admin", "123", "postgres", false)
 	ensureExtensionExists()
 	ensureTablesExist()
 	clearTable()
