@@ -17,6 +17,10 @@ env:
 env:
   DOCKER_COMPOSE_VERSION: 1.25.5
 
+branches:
+  only:
+  - master
+
 stages:
   - testing
   - build
