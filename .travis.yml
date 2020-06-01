@@ -1,29 +1,55 @@
-sudo: required
 os: linux
+dist: xenial
 
-language: go
+cache:
+  directories:
+    - node_modules
+    - app/node_modules
+    - $HOME/.cache/electron
+    - $HOME/.cache/electron-builder
+    - $HOME/.npm/_prebuilds
 
-go:
-  - 1.14.x
-
-services:
-  - docker
+env:
+  global:
+    - ELECTRON_CACHE=$HOME/.cache/electron
+    - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
 
 env:
   DOCKER_COMPOSE_VERSION: 1.25.5
 
-before_install:
-  - sudo rm /usr/local/bin/docker-compose
-  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
-  - chmod +x docker-compose
-  - sudo mv docker-compose /usr/local/bin
+stages:
+  - testing
+  - build
 
-before_script:
-  - docker-compose up -d --build
-
-script:
-  - cd ./GoRestAPI/
-  - go test -v
+jobs:
+  include:
+    - stage: testing
+      name: "Unit test GoRestAPI"
+      language: go 
+      go : 1.14.x
+      services:
+        - docker
+      before_install:
+        - sudo rm /usr/local/bin/docker-compose
+        - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+        - chmod +x docker-compose
+        - sudo mv docker-compose /usr/local/bin
+        - cd ./Postgres/
+        - docker volume create --name data -d local
+        - docker-compose up -d --build
+        - cd ..                  
+      script: 
+        - cd ./GoRestAPI/
+        - go test -v     
+    - stage: build
+      name: "Electron build"
+      os: windows
+      language: node_js
+      node_js: 13
+      script: 
+        - cd ./ElectronApp/Snippets/ 
+        - npm install 
+        - npm run make
 
 after_script:
   - docker-compose down
