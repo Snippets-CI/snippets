@@ -1,4 +1,5 @@
 import { SnippetDto } from "./dto/snippetDto";
+
 /**
  * This file will automatically be loaded by webpack and run in the "renderer" context.
  * To learn more about the differences between the "main" and the "renderer" context in
@@ -14,6 +15,7 @@ import "bootstrap";
 import "bootstrap-select";
 import "bootstrap-select/dist/css/bootstrap-select.min.css";
 import axios from "axios";
+// eslint-disable-next-line import/no-unresolved
 import * as monaco from "monaco-editor";
 import * as snippet from "./dto/snippetDto";
 import * as user from "./dto/userDto";
@@ -23,6 +25,10 @@ import $ from "jquery";
 /* ********************
  * Declarations
  * ********************/
+
+const restApiConnectionString = "http://localhost:8010/";
+const defaultLanguage = "markdown";
+let currentUser: user.UserDto = null;
 
 const languages = [
   "abap",
@@ -96,11 +102,9 @@ const editor = monaco.editor.create(
   }
 );
 
-const model = monaco.editor.createModel("function () {}", "javascript");
+const model = monaco.editor.createModel("", "markdown");
 
-const selector = document.getElementById(
-  "languageSelector"
-) as HTMLSelectElement;
+const selector = $("#languageSelector").get(0) as HTMLSelectElement;
 
 /* ********************
  * Functions
@@ -152,119 +156,162 @@ function loadLanguages(): void {
     const language = languages[parseInt(selector.value)];
     monaco.editor.setModelLanguage(model, language);
   });
+
+  // set default language
+  selector.selectedIndex = languages.indexOf(defaultLanguage);
 }
 
-function loadSnippets(): void {
-  axios
-    .get("http://localhost:8010/users/1/snippets")
+function setModelWithLanguage(loadedSnippet: snippet.SnippetDto): void {
+  model.setValue(loadedSnippet.code);
+  monaco.editor.setModelLanguage(model, loadedSnippet.language);
+  selector.selectedIndex = languages.indexOf(loadedSnippet.language);
+  $(".selectpicker").selectpicker("refresh");
+  $("#monacoSnippetName").text(loadedSnippet.title);
+}
+
+async function loadUserAsync(
+  connectionString: string,
+  usermail: string
+): Promise<user.UserDto> {
+  return axios
+    .post(`${connectionString}login`, {
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      user_id: "",
+      username: "",
+      mail: usermail,
+      password: "",
+    })
     .then((response) => {
-      // check and cast to Snippet
-      if (!snippet.isSnippetDto(response.data[0])) {
-        console.error("Invalid request");
-        console.info(response);
-      } else {
-        const peopleArray: SnippetDto[] = Object.keys(response.data).map(
-          (i) => response.data[i]
+      if (!user.isUserDto(response.data)) {
+        console.error(
+          `Invalid request - expected UserDTO got:\n${response.data}`
         );
+        console.info(response);
+        return null;
+      } else {
+        return response.data;
+      }
+    })
+    .catch((error) => {
+      console.log(`Error while loading user ${usermail}`, error);
+      return null;
+    });
+}
 
-        const ul = document.getElementById("snippetList");
+async function loadSnippetAsync(
+  connectionString: string,
+  userId: string,
+  snippetId: string
+): Promise<snippet.SnippetDto> {
+  return axios
+    .get(`${connectionString}user/${userId}/snippets/${snippetId}`)
+    .then((response) => {
+      if (!snippet.isSnippetDto(response.data)) {
+        console.error(`Invalid request - expected SnippetDTO`);
+        console.info(response);
+        return null;
+      } else {
+        return response.data;
+      }
+    })
+    .catch((error) => {
+      console.log(
+        `Error while loading snippet with id ${snippetId} for user ${userId}`,
+        error
+      );
+      return null;
+    });
+}
 
-        for (const data of peopleArray) {
-          const html = `<li class="nav-item">
-              <a class="nav-link" href="#">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                  class="feather feather-file-text"
-                  style="--darkreader-inline-fill:none; --darkreader-inline-stroke:currentColor;"
-                  data-darkreader-inline-fill="" data-darkreader-inline-stroke="">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                  <line x1="16" y1="17" x2="8" y2="17"></line>
-                  <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
-                ${data.name}
-              </a>
-            </li>`;
-
-          const li = htmlToElement(html);
-
-          //const li = document.createElement("li");
-          //li.appendChild(document.createTextNode(data.id));
-          ul.appendChild(li);
+async function loadSnippetsAsync(
+  connectionString: string,
+  userId: string
+): Promise<snippet.SnippetDto[]> {
+  return axios
+    .get(`${connectionString}user/${userId}/snippets`)
+    .then((response) => {
+      if (response.data.length > 0) {
+        if (!snippet.isSnippetDto(response.data[0])) {
+          console.error(`Invalid request - expected SnippetDTO`);
+          console.info(response);
+          return [] as SnippetDto[];
+        } else {
+          const snippets: SnippetDto[] = Object.keys(response.data).map(
+            (i) => response.data[i]
+          );
+          return snippets;
         }
       }
     })
     .catch((error) => {
-      console.log("Error while loading snippets: ", error);
+      console.log(`Error while loading snippets for user ${userId}`, error);
+      return [] as SnippetDto[];
     });
 }
 
-function loadSnippet(): void {
-  axios
-    .get("http://localhost:8010/users/1/snippets/3")
-    .then((response) => {
-      // check and cast to Snippet
-      if (!snippet.isSnippetDto(response.data)) {
-        console.error("Invalid request");
-        console.info(response);
-      } else {
-        model.setValue(response.data.code);
-        selector.selectedIndex = languages.indexOf(response.data.lang);
-        monaco.editor.setModelLanguage(model, response.data.lang);
-        document.getElementById("monacoSnippetName").textContent =
-          response.data.name;
-      }
-    })
-    .catch((error) => {
-      console.log("Error while loading snippet: ", error);
+function createSnippetLinks(
+  connectionString: string,
+  snippets: SnippetDto[]
+): void {
+  const ul = document.getElementById("snippetList");
+
+  for (const s of snippets) {
+    const html = `<li class="nav-item">
+                    <a class="nav-link" href="#">
+                      ${s.title}
+                    </a>
+                  </li>`;
+
+    const li = htmlToElement(html);
+    li.addEventListener("click", async () => {
+      loadSnippetAsync(
+        connectionString,
+        currentUser.user_id,
+        s.snippet_id
+      ).then((response) => {
+        if (response != null) {
+          setModelWithLanguage(response);
+        }
+      });
     });
+
+    ul.appendChild(li);
+  }
 }
 
-function loadUser(): void {
-  axios
-    .get("http://localhost:8010/users/1")
-    .then((response) => {
-      // check and cast to Snippet
-      if (!user.isUserDto(response.data)) {
-        console.error("Invalid request");
-        console.info(response);
-      } else {
-        document.getElementById("userNameLink").textContent =
-          "Hi " + response.data.name;
-      }
-    })
-    .catch((error) => {
-      console.log("Error while loading user: ", error);
-    });
-}
+function loadMainApplication(usermail: string): void {
+  loadUserAsync(restApiConnectionString, usermail).then((response) => {
+    if (response != null) {
+      currentUser = response;
 
-function loadMainApplication(): void {
-  initializeMonacoEditor();
-  loadUser();
-  loadSnippets();
-  loadSnippet();
+      $("#loginModal").modal("hide").data("#loginModal", null);
+      $("#userNameLink").text("Hi " + currentUser.username);
+
+      loadSnippetsAsync(restApiConnectionString, currentUser.user_id).then(
+        (response) => {
+          if (response.length > 0) {
+            createSnippetLinks(restApiConnectionString, response);
+          }
+        }
+      );
+    }
+  });
 }
 
 function addLoginListener(): void {
   // Handle login
   $("#loginBtn").click(() => {
-    let userName = $("#username").val();
-    let password = $("#password").val();
+    const userName = $("#username").val() as string;
+    const password = $("#password").val();
 
-
-    loadMainApplication();
-    $("#loginModal").modal("hide").data("#loginModal", null);
+    loadMainApplication(userName);
   });
-
 
   // Handle Register
   $("#registerBtn").click(() => {
     let userName = $("#username").val();
     let password = $("#password").val();
 
-
-    loadMainApplication();
     $("#loginModal").modal("hide").data("#loginModal", null);
   });
 }
@@ -280,4 +327,5 @@ window.onclose = function (): void {
 };
 
 addLoginListener();
+initializeMonacoEditor();
 loadLanguages();
