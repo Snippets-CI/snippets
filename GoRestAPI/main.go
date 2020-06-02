@@ -43,7 +43,7 @@ func main() {
 	a := App{}
 
 	// should be done by os.Getenv("")
-	a.Initialize("admin", "123", "Snippets", true)
+	a.Initialize("admin", "123", "postgres", true)
 
 	a.Run(":8000")
 }
