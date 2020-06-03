@@ -28,6 +28,7 @@ Installation:
 > npm install jquery --save-dev
 > npm install -D @types/bootstrap
 > npm install @types/jquery
+> npm install --save @types/bootstrap-select
 
 In `webpack.rules.js` add another rule:
 ```typescript
