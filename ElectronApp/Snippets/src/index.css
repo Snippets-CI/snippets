@@ -5,6 +5,7 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  background-color: #222425;
 }
 
 #monaco-container {
@@ -12,7 +13,7 @@ body {
   padding: 0;
   border: 0;
   width: 100%;
-  height: calc(100% - 165px);
+  height: calc(100% - 128px);
   overflow: hidden;
 }
 

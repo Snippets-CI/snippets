@@ -256,11 +256,7 @@ function createSnippetLinks(
   const ul = document.getElementById("snippetList");
 
   for (const s of snippets) {
-    const html = `<li class="nav-item">
-                    <a class="nav-link" href="#">
-                      ${s.title}
-                    </a>
-                  </li>`;
+    const html = `<li class="list-group-item" style="padding: 0em;"><a class="nav-link" href="#">${s.title}</a></li>`;
 
     const li = htmlToElement(html);
     li.addEventListener("click", async () => {
@@ -301,10 +297,10 @@ function loadMainApplication(usermail: string): void {
 function addLoginListener(): void {
   // Handle login
   $("#loginBtn").click(() => {
-    const userName = $("#username").val() as string;
+    const usermail = $("#usermail").val() as string;
     const password = $("#password").val();
 
-    loadMainApplication(userName);
+    loadMainApplication(usermail);
   });
 
   // Handle Register

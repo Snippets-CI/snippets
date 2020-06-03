@@ -11,8 +11,6 @@
 
 <body>
 
-
-
   <!--    Login View Start   -->
   <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
     aria-hidden="true" data-keyboard="false" data-backdrop="static">
@@ -24,8 +22,8 @@
         <div class="modal-body">
           <form>
             <div class="form-group">
-              <label>User Name</label>
-              <input id="username" type="text" class="form-control" placeholder="User Name">
+              <label>Mail</label>
+              <input id="usermail" type="text" class="form-control" placeholder="Mail">
             </div>
             <div class="form-group">
               <label>Password</label>
@@ -47,7 +45,7 @@
 
 
   <nav class="navbar navbar-dark bg-dark flex-md-nowrap p-0">
-    <a id="userNameLink" class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Username</a>
+    <a id="userNameLink" class="navbar-brand col-3 mr-0" href="#">Username</a>
 
     <ul class="navbar-nav px-3">
       <li class="nav-item text-nowrap">
@@ -56,8 +54,8 @@
     </ul>
   </nav>
 
-  <div class="row h-100">
-    <div class="col col-sm-2 bg-light">
+  <div class="row h-100 bg-monaco">
+    <div class="col col-2 bg-light justify-content-center bg-secondary" style="padding-right:0em;">
       <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
         <span>Snippets</span>
         <a class="d-flex align-items-center text-muted" href="#">
@@ -72,33 +70,34 @@
           </svg>
         </a>
       </h6>
-    </div>
-    <div class="col col-sm-2 bg-light">
-      <ul id="snippetList" class="nav flex-column mb-2">
-      </ul>
-    </div>
-    <div class="col col-sm-8">
 
-      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-        <h5 id="monacoSnippetName" class="h2">Snippet Name</h5>
-        <div class="btn-toolbar mb-2 mb-md-0">
-          <div class="btn-group mr-2">
-            <button class="btn btn-sm btn-outline-secondary">Share</button>
+      <ul id="snippetList" class="list-group-flush" style="padding: 0em;"></ul>
+    </div>
+    <div class="col" style="padding-left: 0em;">
+
+      <div class="container-fluid" style="padding-top: 5px; padding-bottom: 5px;">
+        <div class="row h-100 align-items-center">
+          <div class="col-4">
+            <a id="monacoSnippetName" style="color: #fff;">Snippet name</a>
+          </div>
+          <div class="col-4"></div>
+          <div class="col-4">
+            <button class="btn btn-sm btn-outline-secondary float-right">Share</button>
           </div>
         </div>
       </div>
 
       <div id="monaco-container" style="border:1px solid black"></div>
 
-      <div class="container bg-monaco">
-        <div class="row">
-          <div class="col-sm">
+      <div class="bg-monaco h-100">
+        <div class="row align-self-center">
+          <div class="col">
             <select id="languageSelector" class="selectpicker" data-live-search="true" data-style="btn-new">
             </select>
           </div>
-          <div class="col-sm">
+          <div class="col">
           </div>
-          <div class="col-sm">
+          <div class="col">
           </div>
         </div>
       </div>
