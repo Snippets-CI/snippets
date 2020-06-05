@@ -19,7 +19,7 @@ import axios from "axios";
 import * as monaco from "monaco-editor";
 import * as snippet from "./dto/snippetDto";
 import * as user from "./dto/userDto";
-
+import { clipboard } from "electron";
 import $ from "jquery";
 
 /* ********************
@@ -29,6 +29,8 @@ import $ from "jquery";
 const restApiConnectionString = "http://localhost:8010/";
 const defaultLanguage = "markdown";
 let currentUser: user.UserDto = null;
+let currentSnippet: snippet.SnippetDto = null;
+let currentSnippetModified = false;
 
 const languages = [
   "abap",
@@ -114,19 +116,20 @@ function updateDimensions(): void {
   editor.layout();
 }
 
-function initializeMonacoEditor(): void {
-  editor.setModel(model);
+function saveCurrentSnippetFromModel(): void {
+  currentSnippet.code = model.getValue();
+  currentSnippet.title = $("#monacoSnippetName").first().text().toString();
+  currentSnippet.language = languages[selector.selectedIndex];
+}
 
-  // Add bindings
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const myBinding = editor.addCommand(
-    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S,
-    function () {
-      alert("CTRL + S pressed! Save work");
-    }
-  );
+function saveToClipboard(): void {
+  if (currentSnippet != null) {
+    clipboard.writeText(`${JSON.stringify(currentSnippet)}`);
+  }
+}
 
-  editor.layout();
+function setSnippetSaveNotifer(text: string): void {
+  $("#monacoSaveHint").text(text);
 }
 
 /**
@@ -155,6 +158,9 @@ function loadLanguages(): void {
   selector.addEventListener("change", function () {
     const language = languages[parseInt(selector.value)];
     monaco.editor.setModelLanguage(model, language);
+    currentSnippet.language = language;
+    setSnippetSaveNotifer("*not saved");
+    currentSnippetModified = true;
   });
 
   // set default language
@@ -162,6 +168,9 @@ function loadLanguages(): void {
 }
 
 function setModelWithLanguage(loadedSnippet: snippet.SnippetDto): void {
+  // set current snippet
+  currentSnippet = loadedSnippet;
+
   model.setValue(loadedSnippet.code);
   monaco.editor.setModelLanguage(model, loadedSnippet.language);
   selector.selectedIndex = languages.indexOf(loadedSnippet.language);
@@ -249,6 +258,61 @@ async function loadSnippetsAsync(
     });
 }
 
+async function createNewSnippetAsync(
+  connectionString: string,
+  userId: string
+): Promise<snippet.SnippetDto> {
+  return axios
+    .post(`${connectionString}user/${userId}/snippets`, {
+      owner: currentUser.user_id,
+      title: "New Snippet",
+      category: "",
+      code: "",
+      language: "markdown",
+    })
+    .then((response) => {
+      if (!snippet.isSnippetDto(response.data)) {
+        console.error(`Invalid request - expected SnippetDTO`);
+        console.info(response);
+        return null;
+      } else {
+        return response.data;
+      }
+    })
+    .catch((error) => {
+      console.log(`Error while creating snippets for user ${userId}`, error);
+      return null;
+    });
+}
+
+async function updateSnippetAsync(
+  connectionString: string,
+  userId: string
+): Promise<snippet.SnippetDto> {
+  return axios
+    .put(
+      `${connectionString}user/${userId}/snippets/${currentSnippet.snippet_id}`,
+      JSON.stringify(currentSnippet)
+    )
+    .then((response) => {
+      if (!snippet.isSnippetDto(response.data)) {
+        console.error(`Invalid request - expected SnippetDTO`);
+        console.info(response);
+        return null;
+      } else {
+        currentSnippetModified = false;
+        return response.data;
+      }
+    })
+    .catch((error) => {
+      console.log(
+        `Error while updating snippet for user ${userId} snippet: ${currentSnippet.snippet_id}`,
+        error
+      );
+      return null;
+    });
+}
+
 function createSnippetLinks(
   connectionString: string,
   snippets: SnippetDto[]
@@ -256,10 +320,16 @@ function createSnippetLinks(
   const ul = document.getElementById("snippetList");
 
   for (const s of snippets) {
-    const html = `<li class="list-group-item" style="padding: 0em;"><a class="nav-link" href="#">${s.title}</a></li>`;
+    const html = `<li class="list-group-item" style="padding: 0em;"><a id="${s.snippet_id}" class="nav-link" href="#">${
+      s.title
+    }</a></li>`;
 
     const li = htmlToElement(html);
     li.addEventListener("click", async () => {
+      if (currentSnippet != null && currentSnippetModified) {
+        await updateSnippetAsync(restApiConnectionString, currentUser.user_id);
+      }
+
       loadSnippetAsync(
         connectionString,
         currentUser.user_id,
@@ -281,7 +351,63 @@ function loadMainApplication(usermail: string): void {
       currentUser = response;
 
       $("#loginModal").modal("hide").data("#loginModal", null);
+      $("#monacoSnippetName").click(() => {
+        if (currentSnippet != null) {
+          $("#snippetUpdateName").val(currentSnippet.title);
+          $("#changeNameModal").modal("show");
+        }
+      });
+
       $("#userNameLink").text("Hi " + currentUser.username);
+      $("#shareButton").click(() => {
+        saveToClipboard();
+      });
+
+      $("#updateSnippetButton").click(() => {
+        const newSnippetName = $("#snippetUpdateName").val() as string;
+
+        $("#monacoSnippetName").text(newSnippetName);
+        $(`#${currentSnippet.snippet_id}`).text(newSnippetName);
+        $("#changeNameModal").modal("hide");
+
+        currentSnippet.title = newSnippetName;
+        updateSnippetAsync(restApiConnectionString, currentUser.user_id);
+      });
+
+      $("#snippetCreationLink").click(() => {
+        createNewSnippetAsync(
+          restApiConnectionString,
+          currentUser.user_id
+        ).then((snippetResponse) => {
+          const ul = document.getElementById("snippetList");
+          const html = `<li class="list-group-item" style="padding: 0em;"><a id="${snippetResponse.snippet_id}" class="nav-link" href="#">${
+            snippetResponse.title
+          }</a></li>`;
+          const li = htmlToElement(html);
+
+          li.addEventListener("click", async () => {
+            if (currentSnippet != null && currentSnippetModified) {
+              await updateSnippetAsync(
+                restApiConnectionString,
+                currentUser.user_id
+              );
+            }
+
+            loadSnippetAsync(
+              restApiConnectionString,
+              currentUser.user_id,
+              snippetResponse.snippet_id
+            ).then((response) => {
+              if (response != null) {
+                setModelWithLanguage(response);
+              }
+            });
+          });
+
+          ul.appendChild(li);
+          console.log(response);
+        });
+      });
 
       loadSnippetsAsync(restApiConnectionString, currentUser.user_id).then(
         (response) => {
@@ -310,6 +436,42 @@ function addLoginListener(): void {
 
     $("#loginModal").modal("hide").data("#loginModal", null);
   });
+}
+
+function initializeMonacoEditor(): void {
+  editor.setModel(model);
+
+  // Add bindings
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const myBinding = editor.addCommand(
+    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S,
+    function () {
+      saveCurrentSnippetFromModel();
+      updateSnippetAsync(restApiConnectionString, currentUser.user_id)
+        .then((response) => {
+          setSnippetSaveNotifer("");
+        })
+        .catch((error) => {
+          console.log(
+            `Error while saving snippet for user ${currentUser.user_id}, snippet: ${currentSnippet.snippet_id}`,
+            error
+          );
+          setSnippetSaveNotifer("*not saved");
+        });
+    }
+  );
+
+  editor.onDidChangeModelContent((event) => {
+    if (currentSnippet != null && currentSnippet.code != model.getValue()) {
+      setSnippetSaveNotifer("*not saved");
+      currentSnippetModified = true;
+      currentSnippet.code = model.getValue();
+    } else {
+      setSnippetSaveNotifer("");
+    }
+  });
+
+  editor.layout();
 }
 
 // Load Login Modal on start up

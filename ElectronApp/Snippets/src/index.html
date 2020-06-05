@@ -43,6 +43,31 @@
 
   <!--     Login View End    -->
 
+    <!--    Snippet View Start   -->
+    <div class="modal fade" id="changeNameModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+    aria-hidden="true" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Change snippet name</h5>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="form-group">
+              <label>Name</label>
+              <input id="snippetUpdateName" type="text" class="form-control" placeholder="Name">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer justify-content-center align-items-center">
+          <button id="updateSnippetButton" type="button" class="btn btn-primary">Update</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--     Snippet View End    -->
+
 
   <nav class="navbar navbar-dark bg-dark flex-md-nowrap p-0">
     <a id="userNameLink" class="navbar-brand col-3 mr-0" href="#">Username</a>
@@ -58,7 +83,7 @@
     <div class="col col-2 bg-light justify-content-center bg-secondary" style="padding-right:0em;">
       <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
         <span>Snippets</span>
-        <a class="d-flex align-items-center text-muted" href="#">
+        <a id="snippetCreationLink" class="d-flex align-items-center text-muted" href="#">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
             class="feather feather-plus-circle"
@@ -78,11 +103,16 @@
       <div class="container-fluid" style="padding-top: 5px; padding-bottom: 5px;">
         <div class="row h-100 align-items-center">
           <div class="col-4">
-            <a id="monacoSnippetName" style="color: #fff;">Snippet name</a>
+            <a id="monacoSnippetName" style="color: #fff;"></a>
           </div>
-          <div class="col-4"></div>
           <div class="col-4">
-            <button class="btn btn-sm btn-outline-secondary float-right">Share</button>
+            <a id="monacoSaveHint" style="color: #fff;"></a>
+          </div>
+          <div class="col-4">
+            <button id="shareButton" type="button" class="btn btn-sm btn-outline-secondary float-right"
+              data-container="body" data-toggle="popover" data-placement="top" data-content="Saved to clipboard!">
+              Share
+            </button>
           </div>
         </div>
       </div>
