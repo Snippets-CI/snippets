@@ -320,9 +320,7 @@ function createSnippetLinks(
   const ul = document.getElementById("snippetList");
 
   for (const s of snippets) {
-    const html = `<li class="list-group-item" style="padding: 0em;"><a id="${s.snippet_id}" class="nav-link" href="#">${
-      s.title
-    }</a></li>`;
+    const html = `<li class="list-group-item" style="padding: 0em;"><a id="${s.snippet_id}" class="nav-link" href="#">${s.title}</a></li>`;
 
     const li = htmlToElement(html);
     li.addEventListener("click", async () => {
@@ -349,8 +347,10 @@ function loadMainApplication(usermail: string): void {
   loadUserAsync(restApiConnectionString, usermail).then((response) => {
     if (response != null) {
       currentUser = response;
-
       $("#loginModal").modal("hide").data("#loginModal", null);
+
+      $("[data-toggle=popover]").popover();
+      $("#userNameLink").text("Hi " + currentUser.username);
       $("#monacoSnippetName").click(() => {
         if (currentSnippet != null) {
           $("#snippetUpdateName").val(currentSnippet.title);
@@ -358,7 +358,6 @@ function loadMainApplication(usermail: string): void {
         }
       });
 
-      $("#userNameLink").text("Hi " + currentUser.username);
       $("#shareButton").click(() => {
         saveToClipboard();
       });
@@ -380,9 +379,7 @@ function loadMainApplication(usermail: string): void {
           currentUser.user_id
         ).then((snippetResponse) => {
           const ul = document.getElementById("snippetList");
-          const html = `<li class="list-group-item" style="padding: 0em;"><a id="${snippetResponse.snippet_id}" class="nav-link" href="#">${
-            snippetResponse.title
-          }</a></li>`;
+          const html = `<li class="list-group-item" style="padding: 0em;"><a id="${snippetResponse.snippet_id}" class="nav-link" href="#">${snippetResponse.title}</a></li>`;
           const li = htmlToElement(html);
 
           li.addEventListener("click", async () => {
