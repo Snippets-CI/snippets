@@ -14,11 +14,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap";
 import "bootstrap-select";
 import "bootstrap-select/dist/css/bootstrap-select.min.css";
-import axios from "axios";
+import axios, { AxiosAdapter } from "axios";
 // eslint-disable-next-line import/no-unresolved
 import * as monaco from "monaco-editor";
 import * as snippet from "./dto/snippetDto";
 import * as user from "./dto/userDto";
+import * as bcrypt from 'bcrypt';
 import { clipboard } from "electron";
 import $ from "jquery";
 
@@ -178,32 +179,31 @@ function setModelWithLanguage(loadedSnippet: snippet.SnippetDto): void {
   $("#monacoSnippetName").text(loadedSnippet.title);
 }
 
-async function loadUserAsync(
-  connectionString: string,
-  usermail: string
-): Promise<user.UserDto> {
-  return axios
-    .post(`${connectionString}login`, {
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      user_id: "",
-      username: "",
-      mail: usermail,
-      password: "",
+async function loadUserAsync(connectionString: string, usermail: string, password: string): Promise<user.UserDto> {
+
+    const username = deriveUsernameFromEmail(usermail);
+
+    return axios.post(`${connectionString}`, {
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        user_id: "",
+        username: username,
+        mail: usermail,
+        password: password,
     })
     .then((response) => {
-      if (!user.isUserDto(response.data)) {
-        console.error(
-          `Invalid request - expected UserDTO got:\n${response.data}`
-        );
-        console.info(response);
-        return null;
-      } else {
-        return response.data;
-      }
+        if (!user.isUserDto(response.data)) {
+            console.error(
+                `Invalid request - expected UserDTO got:\n${response.data}`
+            );
+            console.info(response);
+            return null;
+        } else {
+            return response.data;
+        }
     })
     .catch((error) => {
-      console.log(`Error while loading user ${usermail}`, error);
-      return null;
+        console.log(`Error while loading user ${usermail}`, error);
+        return null;
     });
 }
 
@@ -343,96 +343,99 @@ function createSnippetLinks(
   }
 }
 
-function loadMainApplication(usermail: string): void {
-  loadUserAsync(restApiConnectionString, usermail).then((response) => {
-    if (response != null) {
-      currentUser = response;
-      $("#loginModal").modal("hide").data("#loginModal", null);
-
-      $("[data-toggle=popover]").popover();
-      $("#userNameLink").text("Hi " + currentUser.username);
-      $("#monacoSnippetName").click(() => {
-        if (currentSnippet != null) {
-          $("#snippetUpdateName").val(currentSnippet.title);
-          $("#changeNameModal").modal("show");
-        }
-      });
-
-      $("#shareButton").click(() => {
-        saveToClipboard();
-      });
-
-      $("#updateSnippetButton").click(() => {
-        const newSnippetName = $("#snippetUpdateName").val() as string;
-
-        $("#monacoSnippetName").text(newSnippetName);
-        $(`#${currentSnippet.snippet_id}`).text(newSnippetName);
-        $("#changeNameModal").modal("hide");
-
-        currentSnippet.title = newSnippetName;
-        updateSnippetAsync(restApiConnectionString, currentUser.user_id);
-      });
-
-      $("#snippetCreationLink").click(() => {
-        createNewSnippetAsync(
-          restApiConnectionString,
-          currentUser.user_id
-        ).then((snippetResponse) => {
-          const ul = document.getElementById("snippetList");
-          const html = `<li class="list-group-item" style="padding: 0em;"><a id="${snippetResponse.snippet_id}" class="nav-link" href="#">${snippetResponse.title}</a></li>`;
-          const li = htmlToElement(html);
-
-          li.addEventListener("click", async () => {
-            if (currentSnippet != null && currentSnippetModified) {
-              await updateSnippetAsync(
-                restApiConnectionString,
-                currentUser.user_id
-              );
-            }
-
-            loadSnippetAsync(
-              restApiConnectionString,
-              currentUser.user_id,
-              snippetResponse.snippet_id
-            ).then((response) => {
-              if (response != null) {
-                setModelWithLanguage(response);
-              }
-            });
-          });
-
-          ul.appendChild(li);
-          console.log(response);
-        });
-      });
-
-      loadSnippetsAsync(restApiConnectionString, currentUser.user_id).then(
-        (response) => {
-          if (response.length > 0) {
-            createSnippetLinks(restApiConnectionString, response);
-          }
-        }
-      );
-    }
-  });
+function loadMainApplication(path: string): void {
+    const requestUrl = restApiConnectionString + path;
+    const usermail = $("#usermail").val() as string;
+    const password = $("#password").val() as string;
+    loadUserAsync(requestUrl, usermail, password).then(loginAndRegisterResponseHandler);
 }
 
+function deriveUsernameFromEmail(usermail: string): string {
+    const splittedMail = usermail.split("@");
+    return splittedMail[0];
+}
+
+function loginAndRegisterResponseHandler(response: any): any {
+    if (response != null) {
+        currentUser = response;
+        $("#loginModal").modal("hide").data("#loginModal", null);
+  
+        $("[data-toggle=popover]").popover();
+        $("#userNameLink").text("Hi " + currentUser.username);
+        $("#monacoSnippetName").click(() => {
+            if (currentSnippet != null) {
+                $("#snippetUpdateName").val(currentSnippet.title);
+                $("#changeNameModal").modal("show");
+            }
+        });
+  
+        $("#shareButton").click(() => {
+            saveToClipboard();
+        });
+  
+        $("#updateSnippetButton").click(() => {
+            const newSnippetName = $("#snippetUpdateName").val() as string;
+  
+            $("#monacoSnippetName").text(newSnippetName);
+            $(`#${currentSnippet.snippet_id}`).text(newSnippetName);
+            $("#changeNameModal").modal("hide");
+  
+            currentSnippet.title = newSnippetName;
+            updateSnippetAsync(restApiConnectionString, currentUser.user_id);
+        });
+  
+        $("#snippetCreationLink").click(() => {
+            createNewSnippetAsync(restApiConnectionString, currentUser.user_id)
+            .then((snippetResponse) => {
+                const ul = document.getElementById("snippetList");
+                const html = `<li class="list-group-item" style="padding: 0em;"><a id="${snippetResponse.snippet_id}" class="nav-link" href="#">${snippetResponse.title}</a></li>`;
+                const li = htmlToElement(html);
+  
+                li.addEventListener("click", async () => {
+                    if (currentSnippet != null && currentSnippetModified) {
+                        await updateSnippetAsync(
+                            restApiConnectionString,
+                            currentUser.user_id
+                        );
+                    }
+  
+                    loadSnippetAsync(
+                        restApiConnectionString,
+                        currentUser.user_id,
+                        snippetResponse.snippet_id
+                    ).then((response) => {
+                        if (response != null) {
+                            setModelWithLanguage(response);
+                        }
+                    });
+                });
+  
+                ul.appendChild(li);
+                console.log(response);
+            });
+        });
+  
+        console.log(currentUser);
+        loadSnippetsAsync(restApiConnectionString, currentUser.user_id)
+        .then((response) => {
+            if (response.length > 0) {
+                createSnippetLinks(restApiConnectionString, response);
+            }
+        });
+      }
+}
+
+
 function addLoginListener(): void {
-  // Handle login
-  $("#loginBtn").click(() => {
-    const usermail = $("#usermail").val() as string;
-    const password = $("#password").val();
+    // Handle login
+    $("#loginBtn").click(() => {
+        loadMainApplication("login");
+    });
 
-    loadMainApplication(usermail);
-  });
-
-  // Handle Register
-  $("#registerBtn").click(() => {
-    let userName = $("#username").val();
-    let password = $("#password").val();
-
-    $("#loginModal").modal("hide").data("#loginModal", null);
-  });
+    // Handle Register
+    $("#registerBtn").click(() => {
+        loadMainApplication("user");
+    });
 }
 
 function initializeMonacoEditor(): void {
