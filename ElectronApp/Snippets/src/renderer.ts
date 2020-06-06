@@ -19,7 +19,6 @@ import axios from "axios";
 import * as monaco from "monaco-editor";
 import * as snippet from "./dto/snippetDto";
 import * as user from "./dto/userDto";
-import * as bcrypt from 'bcrypt';
 import { clipboard } from "electron";
 import $ from "jquery";
 
