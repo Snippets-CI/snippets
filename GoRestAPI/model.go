@@ -2,6 +2,8 @@ package main
 
 import (
 	"database/sql"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 // Snippet from DB
@@ -34,7 +36,15 @@ type LoginCredentials struct {
 }
 
 func (user *User) getUser(db *sql.DB) error {
-	err := db.QueryRow(`SELECT user_id, mail, username FROM "users" WHERE mail=$1`, user.Mail).Scan(&user.ID, &user.Mail, &user.Name)
+	var dbUser User
+
+	err := db.QueryRow(`SELECT user_id, mail, username, password FROM "users" WHERE mail=$1`, user.Mail).Scan(&dbUser.ID, &dbUser.Mail, &dbUser.Name, &dbUser.Password)
+
+	// If Query found user with matching email, check the hashed password
+	if err == nil {
+		err = comparePasswords(dbUser.Password, user.Password)
+		user.ID = dbUser.ID
+	}
 
 	if err != nil {
 		err = user.getSnippets(db)
@@ -44,8 +54,10 @@ func (user *User) getUser(db *sql.DB) error {
 }
 
 func (user *User) createUser(db *sql.DB) error {
+	pwd := hashAndSalt(user.Password)
+
 	err := db.QueryRow(`INSERT INTO "users" (mail, username, password) VALUES ($1, $2, $3) RETURNING user_id`,
-		user.Mail, user.Name, user.Password).Scan(&user.ID)
+		user.Mail, user.Name, pwd).Scan(&user.ID)
 
 	if err != nil {
 		return err
@@ -117,4 +129,19 @@ func getSnippets(db *sql.DB, userID string) ([]Snippet, error) {
 	}
 
 	return snippets, nil
+}
+
+func hashAndSalt(password string) string {
+	bPwd := []byte(password)
+	hash, _ := bcrypt.GenerateFromPassword(bPwd, bcrypt.MinCost)
+
+	return string(hash)
+}
+
+func comparePasswords(hashedPwd string, plainPwd string) error {
+	bPlainPwd := []byte(plainPwd)
+	bHashedPwd := []byte(hashedPwd)
+
+	err := bcrypt.CompareHashAndPassword(bHashedPwd, bPlainPwd)
+	return err
 }

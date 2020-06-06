@@ -12,6 +12,7 @@ require (
 	github.com/go-swagger/go-swagger v0.23.0 // indirect
 	github.com/lib/pq v1.5.2
 	github.com/mailru/easyjson v0.7.1 // indirect
+	golang.org/x/crypto v0.0.0-20200311171314-f7b00557c8c4
 	golang.org/x/net v0.0.0-20200520182314-0ba52f642ac2 // indirect
 	golang.org/x/tools v0.0.0-20200526224456-8b020aee10d2 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect

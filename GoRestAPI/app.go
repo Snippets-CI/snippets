@@ -187,7 +187,7 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) createUser(w http.ResponseWriter, r *http.Request) {
-	// swagger:operation PUT /user
+	// swagger:operation POST /user
 	//
 	// Create and returns user
 	// ---
