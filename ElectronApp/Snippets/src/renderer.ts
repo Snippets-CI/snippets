@@ -423,6 +423,15 @@ function loginAndRegisterResponseHandler(response: any): any {
             }
         });
       }
+      else {
+          if($("#usermail").val() as string === "") {
+            $("#usermail").addClass("is-invalid");
+          }
+          else {
+            $("#usermail").removeClass("is-invalid");
+          }
+          $("#password").addClass("is-invalid");
+      }
 }
 
 
