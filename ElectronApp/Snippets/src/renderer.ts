@@ -14,7 +14,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap";
 import "bootstrap-select";
 import "bootstrap-select/dist/css/bootstrap-select.min.css";
-import axios, { AxiosAdapter } from "axios";
+import axios from "axios";
 // eslint-disable-next-line import/no-unresolved
 import * as monaco from "monaco-editor";
 import * as snippet from "./dto/snippetDto";
