@@ -12,7 +12,6 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
-	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
 	_ "github.com/lib/pq"
 )
@@ -22,9 +21,6 @@ type App struct {
 	Router *chi.Mux
 	DB     *sql.DB
 }
-
-// JWT auth token
-var tokenAuth *jwtauth.JWTAuth
 
 // Initialize app and connect to db
 func (a *App) Initialize(user, password, dbname string, middlewareEnabled bool) {
@@ -38,9 +34,6 @@ func (a *App) Initialize(user, password, dbname string, middlewareEnabled bool) 
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	//TODO: change secrete and store in env
-	tokenAuth = jwtauth.New("HS256", []byte("secret"), nil)
 
 	a.Router = chi.NewRouter()
 
@@ -178,9 +171,6 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	// TODO: check jwt
-	// for now it returns a user for a certain email
-
 	if err := user.getUser(a.DB); err != nil {
 		switch err {
 		case sql.ErrNoRows:
@@ -191,9 +181,16 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, tokenString, _ := tokenAuth.Encode(jwt.MapClaims{"user_id": user.ID, "username": user.Name})
-	//_, tokenString, _ := tokenAuth.Encode(jwt.MapClaims{"user": user})
-	fmt.Println(tokenString)
+	//_, tokenString, _ := tokenAuth.Encode(jwt.MapClaims{"user_id": user.ID, "username": user.Name})
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id":  user.ID,
+		"username": user.Name,
+	})
+
+	// !!!!!!!!!!
+	// TODO: create secret key and save in env
+	// !!!!!!!!!!!!
+	tokenString, _ := token.SignedString([]byte("secret"))
 
 	respondWithJSON(w, http.StatusOK, tokenString)
 }
@@ -573,10 +570,40 @@ func (a *App) getSnippets(w http.ResponseWriter, r *http.Request) {
 
 	user := User{ID: id}
 
+	tokenString := r.Header.Get("Authorization")
+	userID, err := validateJwtToken(tokenString)
+
+	if err != nil {
+		respondWithError(w, http.StatusForbidden, err.Error())
+
+	} else if userID != id {
+		respondWithError(w, http.StatusUnauthorized, err.Error())
+	}
+
 	if err := user.getSnippets(a.DB); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	respondWithJSON(w, http.StatusOK, user.Snippets)
+}
+
+// Validates the token and returns the userid or an error in case of an error
+func validateJwtToken(tokenString string) (string, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+
+		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
+		return []byte("secret"), nil
+	})
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims["user_id"].(string), err
+
+	}
+
+	return "", err
 }

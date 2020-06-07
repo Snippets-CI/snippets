@@ -35,7 +35,7 @@ let currentSnippetModified = false;
 let jwtAuthToken = "";
 let jwtHeaderConfig = {
     headers: {
-        Authorization: "Bearer " + jwtAuthToken
+        Authorization: "" + jwtAuthToken
      }
 }
 
@@ -199,7 +199,7 @@ async function loadUserAsync(connectionString: string, usermail: string, passwor
     .then((response) => {
         // TODO: check if its really a jwt token
         jwtAuthToken = response.data;
-        jwtHeaderConfig.headers.Authorization = "Bearer " + jwtAuthToken;
+        jwtHeaderConfig.headers.Authorization = "" + jwtAuthToken;
 
         const jwtData = jwt_decode(jwtAuthToken);
 
