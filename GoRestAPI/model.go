@@ -44,6 +44,9 @@ func (user *User) getUser(db *sql.DB) error {
 	if err == nil {
 		err = comparePasswords(dbUser.Password, user.Password)
 		user.ID = dbUser.ID
+		user.Mail = dbUser.Mail
+		user.Name = dbUser.Name
+		user.Password = ""
 	}
 
 	if err != nil {

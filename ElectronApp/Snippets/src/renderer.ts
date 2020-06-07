@@ -20,6 +20,7 @@ import * as monaco from "monaco-editor";
 import * as snippet from "./dto/snippetDto";
 import * as user from "./dto/userDto";
 import { clipboard } from "electron";
+import jwt_decode from "jwt-decode";
 import $ from "jquery";
 
 /* ********************
@@ -31,6 +32,12 @@ const defaultLanguage = "markdown";
 let currentUser: user.UserDto = null;
 let currentSnippet: snippet.SnippetDto = null;
 let currentSnippetModified = false;
+let jwtAuthToken = "";
+let jwtHeaderConfig = {
+    headers: {
+        Authorization: "Bearer " + jwtAuthToken
+     }
+}
 
 const languages = [
   "abap",
@@ -190,14 +197,20 @@ async function loadUserAsync(connectionString: string, usermail: string, passwor
         password: password,
     })
     .then((response) => {
-        if (!user.isUserDto(response.data)) {
+        // TODO: check if its really a jwt token
+        jwtAuthToken = response.data;
+        jwtHeaderConfig.headers.Authorization = "Bearer " + jwtAuthToken;
+
+        const jwtData = jwt_decode(jwtAuthToken);
+
+        if (!user.isUserDto(jwtData)) {
             console.error(
                 `Invalid request - expected UserDTO got:\n${response.data}`
             );
             console.info(response);
             return null;
         } else {
-            return response.data;
+            return jwtData;
         }
     })
     .catch((error) => {
@@ -231,12 +244,10 @@ async function loadSnippetAsync(
     });
 }
 
-async function loadSnippetsAsync(
-  connectionString: string,
-  userId: string
-): Promise<snippet.SnippetDto[]> {
+async function loadSnippetsAsync(connectionString: string, userId: string): Promise<snippet.SnippetDto[]> {
+
   return axios
-    .get(`${connectionString}user/${userId}/snippets`)
+    .get(`${connectionString}user/${userId}/snippets`, jwtHeaderConfig)
     .then((response) => {
       if (response.data.length > 0) {
         if (!snippet.isSnippetDto(response.data[0])) {

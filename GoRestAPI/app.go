@@ -8,9 +8,11 @@ import (
 	"net/http"
 	"time"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
+	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
 	_ "github.com/lib/pq"
 )
@@ -20,6 +22,9 @@ type App struct {
 	Router *chi.Mux
 	DB     *sql.DB
 }
+
+// JWT auth token
+var tokenAuth *jwtauth.JWTAuth
 
 // Initialize app and connect to db
 func (a *App) Initialize(user, password, dbname string, middlewareEnabled bool) {
@@ -33,6 +38,9 @@ func (a *App) Initialize(user, password, dbname string, middlewareEnabled bool) 
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	//TODO: change secrete and store in env
+	tokenAuth = jwtauth.New("HS256", []byte("secret"), nil)
 
 	a.Router = chi.NewRouter()
 
@@ -183,7 +191,11 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, user)
+	_, tokenString, _ := tokenAuth.Encode(jwt.MapClaims{"user_id": user.ID, "username": user.Name})
+	//_, tokenString, _ := tokenAuth.Encode(jwt.MapClaims{"user": user})
+	fmt.Println(tokenString)
+
+	respondWithJSON(w, http.StatusOK, tokenString)
 }
 
 func (a *App) createUser(w http.ResponseWriter, r *http.Request) {
