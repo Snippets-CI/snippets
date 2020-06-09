@@ -29,6 +29,7 @@ Installation:
 > npm install -D @types/bootstrap
 > npm install @types/jquery
 > npm install --save @types/bootstrap-select
+> npm i jwt-decode
 
 In `webpack.rules.js` add another rule:
 ```typescript

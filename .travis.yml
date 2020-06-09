@@ -16,26 +16,37 @@ env:
 
 env:
   DOCKER_COMPOSE_VERSION: 1.25.5
+  NODE_PATH: /home/travis/build/AndreasRoither/Snippets/ElectronApp/Snippets/node_modules
 
-addons:
-  sonarcloud:
-    organization: "andreasroither" # the key of the org you chose at step #3
-    token:
-      secure: $SONAR_TOKEN # encrypted value of your token
-script:
-  # other script steps might be done before running the actual analysis
-  - sonar-scanner
+git:
+  depth: false
 
 branches:
   only:
   - master
 
+addons:
+  sonarcloud:
+    organization: "andreasroither" # the key of the org you chose at step #3
+    token: $SONAR_TOKEN # encrypted value of your token
+
 stages:
+  - sonarcloud
   - testing
   - build
 
 jobs:
   include:
+    - stage: sonarcloud
+      name: "Sonarcloud code analysis"
+      language: node_js
+      node_js: 13
+      script:
+        - cd ./ElectronApp/Snippets/ 
+        - npm install 
+        - cd ..
+        - cd ..
+        - sonar-scanner
     - stage: testing
       name: "Unit test GoRestAPI"
       language: go 
