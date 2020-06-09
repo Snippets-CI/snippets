@@ -225,7 +225,7 @@ async function loadSnippetAsync(
   snippetId: string
 ): Promise<snippet.SnippetDto> {
   return axios
-    .get(`${connectionString}user/${userId}/snippets/${snippetId}`)
+    .get(`${connectionString}user/${userId}/snippets/${snippetId}`, jwtHeaderConfig)
     .then((response) => {
       if (!snippet.isSnippetDto(response.data)) {
         console.error(`Invalid request - expected SnippetDTO`);
@@ -272,14 +272,18 @@ async function createNewSnippetAsync(
   connectionString: string,
   userId: string
 ): Promise<snippet.SnippetDto> {
+
+  let data = {
+    owner: currentUser.user_id,
+    title: "New Snippet",
+    category: "",
+    code: "",
+    language: "markdown",
+  }
+
+
   return axios
-    .post(`${connectionString}user/${userId}/snippets`, {
-      owner: currentUser.user_id,
-      title: "New Snippet",
-      category: "",
-      code: "",
-      language: "markdown",
-    })
+    .post(`${connectionString}user/${userId}/snippets`, data, {headers: jwtHeaderConfig.headers})
     .then((response) => {
       if (!snippet.isSnippetDto(response.data)) {
         console.error(`Invalid request - expected SnippetDTO`);
@@ -302,7 +306,7 @@ async function updateSnippetAsync(
   return axios
     .put(
       `${connectionString}user/${userId}/snippets/${currentSnippet.snippet_id}`,
-      JSON.stringify(currentSnippet)
+      JSON.stringify(currentSnippet), {headers: jwtHeaderConfig.headers}
     )
     .then((response) => {
       if (!snippet.isSnippetDto(response.data)) {
