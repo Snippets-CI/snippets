@@ -11,7 +11,10 @@ module.exports = {
   resolve: {
     extensions: [".js", ".ts", ".jsx", ".tsx", ".css", ".json"],
     alias: {
-      jquery: "jquery/src/jquery"
-  }
+      jquery: "jquery/src/jquery",
+    },
   },
+  node: {
+    __dirname: true
+  }
 };

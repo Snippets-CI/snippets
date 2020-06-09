@@ -1,5 +1,3 @@
-import { SnippetDto } from "./dto/snippetDto";
-
 /**
  * This file will automatically be loaded by webpack and run in the "renderer" context.
  * To learn more about the differences between the "main" and the "renderer" context in
@@ -20,7 +18,7 @@ import * as monaco from "monaco-editor";
 import * as snippet from "./dto/snippetDto";
 import * as user from "./dto/userDto";
 import { clipboard } from "electron";
-import jwt_decode from "jwt-decode";
+import jwtDecode from "jwt-decode";
 import $ from "jquery";
 
 /* ********************
@@ -33,11 +31,11 @@ let currentUser: user.UserDto = null;
 let currentSnippet: snippet.SnippetDto = null;
 let currentSnippetModified = false;
 let jwtAuthToken = "";
-let jwtHeaderConfig = {
-    headers: {
-        Authorization: "" + jwtAuthToken
-     }
-}
+const jwtHeaderConfig = {
+  headers: {
+    Authorization: "" + jwtAuthToken,
+  },
+};
 
 const languages = [
   "abap",
@@ -119,8 +117,26 @@ const selector = $("#languageSelector").get(0) as HTMLSelectElement;
  * Functions
  * ********************/
 
+function logout(): void {
+  const emptyText = "";
+
+  $("#monacoSnippetName").text(emptyText);
+  $("#monacoSaveHint").text(emptyText);
+  model.setValue(emptyText);
+  selector.selectedIndex = languages.indexOf(defaultLanguage);
+  $("#userNameLink").text(emptyText);
+  $("#snippetList").empty();
+
+  $("#loginModal").modal("show");
+}
+
 function updateDimensions(): void {
   editor.layout();
+}
+
+function deriveUsernameFromEmail(usermail: string): string {
+  const splittedMail = usermail.split("@");
+  return splittedMail[0];
 }
 
 function saveCurrentSnippetFromModel(): void {
@@ -185,37 +201,41 @@ function setModelWithLanguage(loadedSnippet: snippet.SnippetDto): void {
   $("#monacoSnippetName").text(loadedSnippet.title);
 }
 
-async function loadUserAsync(connectionString: string, usermail: string, password: string): Promise<user.UserDto> {
+async function loadUserAsync(
+  connectionString: string,
+  usermail: string,
+  password: string
+): Promise<user.UserDto> {
+  const username = deriveUsernameFromEmail(usermail);
 
-    const username = deriveUsernameFromEmail(usermail);
-
-    return axios.post(`${connectionString}`, {
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        user_id: "",
-        username: username,
-        mail: usermail,
-        password: password,
+  return axios
+    .post(`${connectionString}`, {
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      user_id: "",
+      username: username,
+      mail: usermail,
+      password: password,
     })
     .then((response) => {
-        // TODO: check if its really a jwt token
-        jwtAuthToken = response.data;
-        jwtHeaderConfig.headers.Authorization = "" + jwtAuthToken;
+      // TODO: check if its really a jwt token
+      jwtAuthToken = response.data;
+      jwtHeaderConfig.headers.Authorization = "" + jwtAuthToken;
 
-        const jwtData = jwt_decode(jwtAuthToken);
+      const jwtData = jwtDecode(jwtAuthToken);
 
-        if (!user.isUserDto(jwtData)) {
-            console.error(
-                `Invalid request - expected UserDTO got:\n${response.data}`
-            );
-            console.info(response);
-            return null;
-        } else {
-            return jwtData;
-        }
+      if (!user.isUserDto(jwtData)) {
+        console.error(
+          `Invalid request - expected UserDTO got:\n${response.data}`
+        );
+        console.info(response);
+        return null;
+      } else {
+        return jwtData;
+      }
     })
     .catch((error) => {
-        console.log(`Error while loading user ${usermail}`, error);
-        return null;
+      console.log(`Error while loading user ${usermail}`, error);
+      return null;
     });
 }
 
@@ -225,7 +245,10 @@ async function loadSnippetAsync(
   snippetId: string
 ): Promise<snippet.SnippetDto> {
   return axios
-    .get(`${connectionString}user/${userId}/snippets/${snippetId}`, jwtHeaderConfig)
+    .get(
+      `${connectionString}user/${userId}/snippets/${snippetId}`,
+      jwtHeaderConfig
+    )
     .then((response) => {
       if (!snippet.isSnippetDto(response.data)) {
         console.error(`Invalid request - expected SnippetDTO`);
@@ -244,8 +267,10 @@ async function loadSnippetAsync(
     });
 }
 
-async function loadSnippetsAsync(connectionString: string, userId: string): Promise<snippet.SnippetDto[]> {
-
+async function loadSnippetsAsync(
+  connectionString: string,
+  userId: string
+): Promise<snippet.SnippetDto[]> {
   return axios
     .get(`${connectionString}user/${userId}/snippets`, jwtHeaderConfig)
     .then((response) => {
@@ -253,9 +278,9 @@ async function loadSnippetsAsync(connectionString: string, userId: string): Prom
         if (!snippet.isSnippetDto(response.data[0])) {
           console.error(`Invalid request - expected SnippetDTO`);
           console.info(response);
-          return [] as SnippetDto[];
+          return [] as snippet.SnippetDto[];
         } else {
-          const snippets: SnippetDto[] = Object.keys(response.data).map(
+          const snippets: snippet.SnippetDto[] = Object.keys(response.data).map(
             (i) => response.data[i]
           );
           return snippets;
@@ -264,7 +289,7 @@ async function loadSnippetsAsync(connectionString: string, userId: string): Prom
     })
     .catch((error) => {
       console.log(`Error while loading snippets for user ${userId}`, error);
-      return [] as SnippetDto[];
+      return [] as snippet.SnippetDto[];
     });
 }
 
@@ -272,18 +297,18 @@ async function createNewSnippetAsync(
   connectionString: string,
   userId: string
 ): Promise<snippet.SnippetDto> {
-
-  let data = {
+  const data = {
     owner: currentUser.user_id,
     title: "New Snippet",
     category: "",
     code: "",
     language: "markdown",
-  }
-
+  };
 
   return axios
-    .post(`${connectionString}user/${userId}/snippets`, data, {headers: jwtHeaderConfig.headers})
+    .post(`${connectionString}user/${userId}/snippets`, data, {
+      headers: jwtHeaderConfig.headers,
+    })
     .then((response) => {
       if (!snippet.isSnippetDto(response.data)) {
         console.error(`Invalid request - expected SnippetDTO`);
@@ -306,7 +331,8 @@ async function updateSnippetAsync(
   return axios
     .put(
       `${connectionString}user/${userId}/snippets/${currentSnippet.snippet_id}`,
-      JSON.stringify(currentSnippet), {headers: jwtHeaderConfig.headers}
+      JSON.stringify(currentSnippet),
+      { headers: jwtHeaderConfig.headers }
     )
     .then((response) => {
       if (!snippet.isSnippetDto(response.data)) {
@@ -327,142 +353,141 @@ async function updateSnippetAsync(
     });
 }
 
-async function registerSnippetLink(connectionString: string, s: snippet.SnippetDto): Promise<void> {
+async function registerSnippetLink(
+  connectionString: string,
+  s: snippet.SnippetDto
+): Promise<void> {
   if (currentSnippet != null && currentSnippetModified) {
     await updateSnippetAsync(restApiConnectionString, currentUser.user_id);
   }
 
-  loadSnippetAsync(
-    connectionString,
-    currentUser.user_id,
-    s.snippet_id
-  ).then((response) => {
-    if (response != null) {
-      setModelWithLanguage(response);
+  loadSnippetAsync(connectionString, currentUser.user_id, s.snippet_id).then(
+    (response) => {
+      if (response != null) {
+        setModelWithLanguage(response);
+      }
     }
-  });
+  );
 }
 
 function createSnippetLinks(
   connectionString: string,
-  snippets: SnippetDto[]
+  snippets: snippet.SnippetDto[]
 ): void {
-  const ul = document.getElementById("snippetList");
+  const ul = $("#snippetList").first()
 
   for (const s of snippets) {
     const html = `<li class="list-group-item" style="padding: 0em;"><a id="${s.snippet_id}" class="nav-link" href="#">${s.title}</a></li>`;
 
     const li = htmlToElement(html);
     li.addEventListener("click", async () => {
-      registerSnippetLink(connectionString, s)
+      registerSnippetLink(connectionString, s);
     });
 
-    ul.appendChild(li);
+    ul.append(li as HTMLElement);
+  }
+}
+
+function loginAndRegisterResponseHandler(response: any): any {
+  if (response != null) {
+    currentUser = response;
+    $("#loginModal").modal("hide").data("#loginModal", null);
+
+    $("[data-toggle=popover]").popover();
+    $("#userNameLink").text("Hi " + currentUser.username);
+    $("#monacoSnippetName").click(() => {
+      if (currentSnippet != null) {
+        $("#snippetUpdateName").val(currentSnippet.title);
+        $("#changeNameModal").modal("show");
+      }
+    });
+
+    $("#shareButton").click(() => {
+      saveToClipboard();
+    });
+
+    $("#updateSnippetButton").click(() => {
+      const newSnippetName = $("#snippetUpdateName").val() as string;
+
+      $("#monacoSnippetName").text(newSnippetName);
+      $(`#${currentSnippet.snippet_id}`).text(newSnippetName);
+      $("#changeNameModal").modal("hide");
+
+      currentSnippet.title = newSnippetName;
+      updateSnippetAsync(restApiConnectionString, currentUser.user_id);
+    });
+
+    $("#snippetCreationLink").click(() => {
+      createNewSnippetAsync(restApiConnectionString, currentUser.user_id).then(
+        (snippetResponse) => {
+          const ul = document.getElementById("snippetList");
+          const html = `<li class="list-group-item" style="padding: 0em;"><a id="${snippetResponse.snippet_id}" class="nav-link" href="#">${snippetResponse.title}</a></li>`;
+          const li = htmlToElement(html);
+
+          li.addEventListener("click", async () => {
+            if (currentSnippet != null && currentSnippetModified) {
+              await updateSnippetAsync(
+                restApiConnectionString,
+                currentUser.user_id
+              );
+            }
+
+            loadSnippetAsync(
+              restApiConnectionString,
+              currentUser.user_id,
+              snippetResponse.snippet_id
+            ).then((snippetResponse2) => {
+              if (snippetResponse2 != null) {
+                setModelWithLanguage(snippetResponse2);
+              }
+            });
+          });
+
+          ul.appendChild(li);
+          console.log(response);
+        }
+      );
+    });
+
+    console.log(currentUser);
+    loadSnippetsAsync(restApiConnectionString, currentUser.user_id).then(
+      (snippetResponse3) => {
+        if (snippetResponse3.length > 0) {
+          createSnippetLinks(restApiConnectionString, snippetResponse3);
+        }
+      }
+    );
+  } else {
+    if (($("#usermail").val() as string) === "") {
+      $("#usermail").addClass("is-invalid");
+    } else {
+      $("#usermail").removeClass("is-invalid");
+    }
+    $("#password").addClass("is-invalid");
   }
 }
 
 function loadMainApplication(path: string): void {
-    const requestUrl = restApiConnectionString + path;
-    const usermail = $("#usermail").val() as string;
-    const password = $("#password").val() as string;
-    loadUserAsync(requestUrl, usermail, password).then(loginAndRegisterResponseHandler);
+  const requestUrl = restApiConnectionString + path;
+  const usermail = $("#usermail").val() as string;
+  const password = $("#password").val() as string;
+  loadUserAsync(requestUrl, usermail, password).then(
+    loginAndRegisterResponseHandler
+  );
 }
-
-function deriveUsernameFromEmail(usermail: string): string {
-    const splittedMail = usermail.split("@");
-    return splittedMail[0];
-}
-
-function loginAndRegisterResponseHandler(response: any): any {
-    if (response != null) {
-        currentUser = response;
-        $("#loginModal").modal("hide").data("#loginModal", null);
-  
-        $("[data-toggle=popover]").popover();
-        $("#userNameLink").text("Hi " + currentUser.username);
-        $("#monacoSnippetName").click(() => {
-            if (currentSnippet != null) {
-                $("#snippetUpdateName").val(currentSnippet.title);
-                $("#changeNameModal").modal("show");
-            }
-        });
-  
-        $("#shareButton").click(() => {
-            saveToClipboard();
-        });
-  
-        $("#updateSnippetButton").click(() => {
-            const newSnippetName = $("#snippetUpdateName").val() as string;
-  
-            $("#monacoSnippetName").text(newSnippetName);
-            $(`#${currentSnippet.snippet_id}`).text(newSnippetName);
-            $("#changeNameModal").modal("hide");
-  
-            currentSnippet.title = newSnippetName;
-            updateSnippetAsync(restApiConnectionString, currentUser.user_id);
-        });
-  
-        $("#snippetCreationLink").click(() => {
-            createNewSnippetAsync(restApiConnectionString, currentUser.user_id)
-            .then((snippetResponse) => {
-                const ul = document.getElementById("snippetList");
-                const html = `<li class="list-group-item" style="padding: 0em;"><a id="${snippetResponse.snippet_id}" class="nav-link" href="#">${snippetResponse.title}</a></li>`;
-                const li = htmlToElement(html);
-  
-                li.addEventListener("click", async () => {
-                    if (currentSnippet != null && currentSnippetModified) {
-                        await updateSnippetAsync(
-                            restApiConnectionString,
-                            currentUser.user_id
-                        );
-                    }
-  
-                    loadSnippetAsync(
-                        restApiConnectionString,
-                        currentUser.user_id,
-                        snippetResponse.snippet_id
-                    ).then((snippetResponse2) => {
-                        if (snippetResponse2 != null) {
-                            setModelWithLanguage(snippetResponse2);
-                        }
-                    });
-                });
-  
-                ul.appendChild(li);
-                console.log(response);
-            });
-        });
-  
-        console.log(currentUser);
-        loadSnippetsAsync(restApiConnectionString, currentUser.user_id)
-        .then((snippetResponse3) => {
-            if (snippetResponse3.length > 0) {
-                createSnippetLinks(restApiConnectionString, snippetResponse3);
-            }
-        });
-      }
-      else {
-          if($("#usermail").val() as string === "") {
-            $("#usermail").addClass("is-invalid");
-          }
-          else {
-            $("#usermail").removeClass("is-invalid");
-          }
-          $("#password").addClass("is-invalid");
-      }
-}
-
 
 function addLoginListener(): void {
-    // Handle login
-    $("#loginBtn").click(() => {
-        loadMainApplication("login");
-    });
+  // Handle login
+  $("#loginBtn").click(() => {
+    loadMainApplication("login");
+  });
 
-    // Handle Register
-    $("#registerBtn").click(() => {
-        loadMainApplication("user");
-    });
+  // Handle Register
+  $("#registerBtn").click(() => loadMainApplication("user"));
+}
+
+function addLogoutListener(): void {
+  $("#logoutBtn").click(() => logout());
 }
 
 function initializeMonacoEditor(): void {
@@ -470,23 +495,20 @@ function initializeMonacoEditor(): void {
 
   // Add bindings
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  editor.addCommand(
-    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S,
-    function () {
-      saveCurrentSnippetFromModel();
-      updateSnippetAsync(restApiConnectionString, currentUser.user_id)
-        .then((response) => {
-          setSnippetSaveNotifer("");
-        })
-        .catch((error) => {
-          console.log(
-            `Error while saving snippet for user ${currentUser.user_id}, snippet: ${currentSnippet.snippet_id}`,
-            error
-          );
-          setSnippetSaveNotifer("*not saved");
-        });
-    }
-  );
+  editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, function () {
+    saveCurrentSnippetFromModel();
+    updateSnippetAsync(restApiConnectionString, currentUser.user_id)
+      .then((response) => {
+        setSnippetSaveNotifer("");
+      })
+      .catch((error) => {
+        console.log(
+          `Error while saving snippet for user ${currentUser.user_id}, snippet: ${currentSnippet.snippet_id}`,
+          error
+        );
+        setSnippetSaveNotifer("*not saved");
+      });
+  });
 
   editor.onDidChangeModelContent((event) => {
     if (currentSnippet != null && currentSnippet.code != model.getValue()) {

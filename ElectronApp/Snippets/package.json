@@ -73,6 +73,7 @@
     "@electron-forge/plugin-webpack": "^6.0.0-beta.51",
     "@marshallofsound/webpack-asset-relocator-loader": "^0.5.0",
     "@types/bootstrap": "^4.5.0",
+    "@types/jwt-decode": "^2.2.1",
     "@typescript-eslint/eslint-plugin": "^2.31.0",
     "@typescript-eslint/parser": "^2.31.0",
     "babel-loader": "^8.1.0",
@@ -96,7 +97,6 @@
   "dependencies": {
     "@types/bootstrap-select": "^1.11.1",
     "@types/jquery": "^3.3.38",
-    "@types/jwt-decode": "^2.2.1",
     "autoprefixer": "^9.7.6",
     "axios": "^0.19.2",
     "bootstrap": "^4.4.1",
