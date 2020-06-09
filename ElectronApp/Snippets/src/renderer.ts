@@ -323,6 +323,22 @@ async function updateSnippetAsync(
     });
 }
 
+async function registerSnippetLink(connectionString: string, s: snippet.SnippetDto): Promise<void> {
+  if (currentSnippet != null && currentSnippetModified) {
+    await updateSnippetAsync(restApiConnectionString, currentUser.user_id);
+  }
+
+  loadSnippetAsync(
+    connectionString,
+    currentUser.user_id,
+    s.snippet_id
+  ).then((response) => {
+    if (response != null) {
+      setModelWithLanguage(response);
+    }
+  });
+}
+
 function createSnippetLinks(
   connectionString: string,
   snippets: SnippetDto[]
@@ -334,19 +350,7 @@ function createSnippetLinks(
 
     const li = htmlToElement(html);
     li.addEventListener("click", async () => {
-      if (currentSnippet != null && currentSnippetModified) {
-        await updateSnippetAsync(restApiConnectionString, currentUser.user_id);
-      }
-
-      loadSnippetAsync(
-        connectionString,
-        currentUser.user_id,
-        s.snippet_id
-      ).then((response) => {
-        if (response != null) {
-          setModelWithLanguage(response);
-        }
-      });
+      registerSnippetLink(connectionString, s)
     });
 
     ul.appendChild(li);
@@ -413,9 +417,9 @@ function loginAndRegisterResponseHandler(response: any): any {
                         restApiConnectionString,
                         currentUser.user_id,
                         snippetResponse.snippet_id
-                    ).then((response) => {
-                        if (response != null) {
-                            setModelWithLanguage(response);
+                    ).then((snippetResponse2) => {
+                        if (snippetResponse2 != null) {
+                            setModelWithLanguage(snippetResponse2);
                         }
                     });
                 });
@@ -427,9 +431,9 @@ function loginAndRegisterResponseHandler(response: any): any {
   
         console.log(currentUser);
         loadSnippetsAsync(restApiConnectionString, currentUser.user_id)
-        .then((response) => {
-            if (response.length > 0) {
-                createSnippetLinks(restApiConnectionString, response);
+        .then((snippetResponse3) => {
+            if (snippetResponse3.length > 0) {
+                createSnippetLinks(restApiConnectionString, snippetResponse3);
             }
         });
       }
@@ -462,7 +466,7 @@ function initializeMonacoEditor(): void {
 
   // Add bindings
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const myBinding = editor.addCommand(
+  editor.addCommand(
     monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S,
     function () {
       saveCurrentSnippetFromModel();
