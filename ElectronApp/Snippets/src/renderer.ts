@@ -120,6 +120,12 @@ const selector = $("#languageSelector").get(0) as HTMLSelectElement;
 function logout(): void {
   const emptyText = "";
 
+  jwtAuthToken = "";
+  currentUser = null;
+  currentSnippet = null;
+  currentSnippetModified = false;
+
+  $("#loginAlert").hide();
   $("#monacoSnippetName").text(emptyText);
   $("#monacoSaveHint").text(emptyText);
   model.setValue(emptyText);
@@ -274,17 +280,18 @@ async function loadSnippetsAsync(
   return axios
     .get(`${connectionString}user/${userId}/snippets`, jwtHeaderConfig)
     .then((response) => {
-      if (response.data.length > 0) {
-        if (!snippet.isSnippetDto(response.data[0])) {
-          console.error(`Invalid request - expected SnippetDTO`);
-          console.info(response);
-          return [] as snippet.SnippetDto[];
-        } else {
-          const snippets: snippet.SnippetDto[] = Object.keys(response.data).map(
-            (i) => response.data[i]
-          );
-          return snippets;
-        }
+      if (response.data.length == 0) {
+        return [] as snippet.SnippetDto[];
+      }
+
+      if (!snippet.isSnippetDto(response.data[0])) {
+        console.error(`Invalid request - expected SnippetDTO`);
+        return [] as snippet.SnippetDto[];
+      } else {
+        const snippets: snippet.SnippetDto[] = Object.keys(response.data).map(
+          (i) => response.data[i]
+        );
+        return snippets;
       }
     })
     .catch((error) => {
@@ -374,7 +381,7 @@ function createSnippetLinks(
   connectionString: string,
   snippets: snippet.SnippetDto[]
 ): void {
-  const ul = $("#snippetList").first()
+  const ul = $("#snippetList").first();
 
   for (const s of snippets) {
     const html = `<li class="list-group-item" style="padding: 0em;"><a id="${s.snippet_id}" class="nav-link" href="#">${s.title}</a></li>`;
@@ -388,68 +395,12 @@ function createSnippetLinks(
   }
 }
 
-function loginAndRegisterResponseHandler(response: any): any {
+function loginAndRegisterResponseHandler(response: user.UserDto): void {
   if (response != null) {
     currentUser = response;
     $("#loginModal").modal("hide").data("#loginModal", null);
-
-    $("[data-toggle=popover]").popover();
     $("#userNameLink").text("Hi " + currentUser.username);
-    $("#monacoSnippetName").click(() => {
-      if (currentSnippet != null) {
-        $("#snippetUpdateName").val(currentSnippet.title);
-        $("#changeNameModal").modal("show");
-      }
-    });
 
-    $("#shareButton").click(() => {
-      saveToClipboard();
-    });
-
-    $("#updateSnippetButton").click(() => {
-      const newSnippetName = $("#snippetUpdateName").val() as string;
-
-      $("#monacoSnippetName").text(newSnippetName);
-      $(`#${currentSnippet.snippet_id}`).text(newSnippetName);
-      $("#changeNameModal").modal("hide");
-
-      currentSnippet.title = newSnippetName;
-      updateSnippetAsync(restApiConnectionString, currentUser.user_id);
-    });
-
-    $("#snippetCreationLink").click(() => {
-      createNewSnippetAsync(restApiConnectionString, currentUser.user_id).then(
-        (snippetResponse) => {
-          const ul = document.getElementById("snippetList");
-          const html = `<li class="list-group-item" style="padding: 0em;"><a id="${snippetResponse.snippet_id}" class="nav-link" href="#">${snippetResponse.title}</a></li>`;
-          const li = htmlToElement(html);
-
-          li.addEventListener("click", async () => {
-            if (currentSnippet != null && currentSnippetModified) {
-              await updateSnippetAsync(
-                restApiConnectionString,
-                currentUser.user_id
-              );
-            }
-
-            loadSnippetAsync(
-              restApiConnectionString,
-              currentUser.user_id,
-              snippetResponse.snippet_id
-            ).then((snippetResponse2) => {
-              if (snippetResponse2 != null) {
-                setModelWithLanguage(snippetResponse2);
-              }
-            });
-          });
-
-          ul.appendChild(li);
-          console.log(response);
-        }
-      );
-    });
-
-    console.log(currentUser);
     loadSnippetsAsync(restApiConnectionString, currentUser.user_id).then(
       (snippetResponse3) => {
         if (snippetResponse3.length > 0) {
@@ -458,25 +409,53 @@ function loginAndRegisterResponseHandler(response: any): any {
       }
     );
   } else {
-    if (($("#usermail").val() as string) === "") {
-      $("#usermail").addClass("is-invalid");
-    } else {
-      $("#usermail").removeClass("is-invalid");
-    }
-    $("#password").addClass("is-invalid");
+    const usermail = $("#usermail");
+    const password = $("#password");
+
+    usermail.addClass("is-invalid");
+    password.addClass("is-invalid");
+
+    $("#loginAlert").text(
+      "Either invalid password or no user with that email found."
+    );
+    $("#loginAlert").show();
   }
 }
 
 function loadMainApplication(path: string): void {
   const requestUrl = restApiConnectionString + path;
-  const usermail = $("#usermail").val() as string;
-  const password = $("#password").val() as string;
-  loadUserAsync(requestUrl, usermail, password).then(
-    loginAndRegisterResponseHandler
-  );
+  const usermail = $("#usermail");
+  const password = $("#password");
+
+  let invalid = false;
+  $("#loginAlert").hide();
+
+  if ((usermail.val() as string) === "") {
+    usermail.addClass("is-invalid");
+    invalid = true;
+  } else {
+    usermail.removeClass("is-invalid");
+  }
+
+  if ((password.val() as string) === "") {
+    password.addClass("is-invalid");
+    invalid = true;
+  } else {
+    password.removeClass("is-invalid");
+  }
+
+  if (!invalid) {
+    loadUserAsync(
+      requestUrl,
+      usermail.val() as string,
+      password.val() as string
+    ).then(loginAndRegisterResponseHandler);
+  }
 }
 
 function addLoginListener(): void {
+  $("#loginAlert").hide();
+
   // Handle login
   $("#loginBtn").click(() => {
     loadMainApplication("login");
@@ -523,6 +502,67 @@ function initializeMonacoEditor(): void {
   editor.layout();
 }
 
+function intializeMainApplication(): void {
+  addLoginListener();
+  addLogoutListener();
+  initializeMonacoEditor();
+  loadLanguages();
+
+  $("[data-toggle=popover]").popover();
+  $("#monacoSnippetName").click(() => {
+    if (currentSnippet != null) {
+      $("#snippetUpdateName").val(currentSnippet.title);
+      $("#changeNameModal").modal("show");
+    }
+  });
+
+  $("#shareButton").click(() => {
+    saveToClipboard();
+  });
+
+  $("#updateSnippetButton").click(() => {
+    const newSnippetName = $("#snippetUpdateName").val() as string;
+
+    $("#monacoSnippetName").text(newSnippetName);
+    $(`#${currentSnippet.snippet_id}`).text(newSnippetName);
+    $("#changeNameModal").modal("hide");
+
+    currentSnippet.title = newSnippetName;
+    updateSnippetAsync(restApiConnectionString, currentUser.user_id);
+  });
+
+  $("#snippetCreationLink").click(() => {
+    createNewSnippetAsync(restApiConnectionString, currentUser.user_id).then(
+      (snippetResponse) => {
+        const ul = document.getElementById("snippetList");
+        const html = `<li class="list-group-item" style="padding: 0em;"><a id="${snippetResponse.snippet_id}" class="nav-link" href="#">${snippetResponse.title}</a></li>`;
+        const li = htmlToElement(html);
+
+        li.addEventListener("click", async () => {
+          if (currentSnippet != null && currentSnippetModified) {
+            await updateSnippetAsync(
+              restApiConnectionString,
+              currentUser.user_id
+            );
+          }
+
+          loadSnippetAsync(
+            restApiConnectionString,
+            currentUser.user_id,
+            snippetResponse.snippet_id
+          ).then((snippetResponse2) => {
+            if (snippetResponse2 != null) {
+              setModelWithLanguage(snippetResponse2);
+            }
+          });
+        });
+
+        ul.appendChild(li);
+      }
+    );
+  });
+}
+
 // Load Login Modal on start up
 $(window).on("load", function () {
   $("#loginModal").modal("show");
@@ -533,6 +573,4 @@ window.onclose = function (): void {
   window.removeEventListener("resize", updateDimensions.bind(this));
 };
 
-addLoginListener();
-initializeMonacoEditor();
-loadLanguages();
+intializeMainApplication();

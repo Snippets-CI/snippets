@@ -20,6 +20,7 @@
           <h5 class="modal-title" id="exampleModalLongTitle">Welcome to Snippets!</h5>
         </div>
         <div class="modal-body">
+          <div id="loginAlert" class="alert alert-danger" role="alert"></div>
           <form>
             <div class="form-group">
               <label>Mail</label>
@@ -41,8 +42,8 @@
 
   <!--     Login View End    -->
 
-    <!--    Snippet View Start   -->
-    <div class="modal fade" id="changeNameModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+  <!--    Snippet View Start   -->
+  <div class="modal fade" id="changeNameModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
     aria-hidden="true" data-keyboard="false" data-backdrop="static">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
@@ -108,7 +109,8 @@
           </div>
           <div class="col-4">
             <button id="shareButton" type="button" class="btn btn-sm btn-outline-secondary float-right"
-              data-container="body" data-toggle="popover" data-placement="top" data-trigger="focus" data-content="Saved to clipboard!">
+              data-container="body" data-toggle="popover" data-placement="top" data-trigger="focus"
+              data-content="Saved to clipboard!">
               Share
             </button>
           </div>
