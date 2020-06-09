@@ -181,7 +181,7 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//_, tokenString, _ := tokenAuth.Encode(jwt.MapClaims{"user_id": user.ID, "username": user.Name})
+	// Create JWT and send it as a response
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id":  user.ID,
 		"username": user.Name,
@@ -190,6 +190,7 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 	// !!!!!!!!!!
 	// TODO: create secret key and save in env
 	// !!!!!!!!!!!!
+	// Sign the token with the secrete key
 	tokenString, _ := token.SignedString([]byte("secret"))
 
 	respondWithJSON(w, http.StatusOK, tokenString)
@@ -236,7 +237,15 @@ func (a *App) createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJSON(w, http.StatusCreated, user)
+	// Create JWT and send it as a response
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id":  user.ID,
+		"username": user.Name,
+	})
+
+	tokenString, _ := token.SignedString([]byte("secret"))
+
+	respondWithJSON(w, http.StatusCreated, tokenString)
 }
 
 func (a *App) updateUser(w http.ResponseWriter, r *http.Request) {
@@ -284,6 +293,16 @@ func (a *App) updateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	tokenString := r.Header.Get("Authorization")
+	userID, err := validateJwtToken(tokenString)
+
+	if err != nil {
+		respondWithError(w, http.StatusForbidden, err.Error())
+
+	} else if userID != user.ID {
+		respondWithError(w, http.StatusUnauthorized, err.Error())
+	}
+
 	if err := user.updateUser(a.DB); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -325,8 +344,18 @@ func (a *App) getSnippet(w http.ResponseWriter, r *http.Request) {
 	//   '401':
 	//      description: authorization failed
 
-	userID := chi.URLParam(r, "userID")
+	id := chi.URLParam(r, "userID")
 	val := chi.URLParam(r, "snippetID")
+
+	tokenString := r.Header.Get("Authorization")
+	userID, err := validateJwtToken(tokenString)
+
+	if err != nil {
+		respondWithError(w, http.StatusForbidden, err.Error())
+
+	} else if userID != id {
+		respondWithError(w, http.StatusUnauthorized, err.Error())
+	}
 
 	p := Snippet{ID: val, Owner: userID}
 	if err := p.getSnippet(a.DB); err != nil {
@@ -390,7 +419,17 @@ func (a *App) createSnippet(w http.ResponseWriter, r *http.Request) {
 	//   '401':
 	//      description: authorization failed
 
-	//userID := chi.URLParam(r, "userID")
+	id := chi.URLParam(r, "userID")
+
+	tokenString := r.Header.Get("Authorization")
+	userID, err := validateJwtToken(tokenString)
+
+	if err != nil {
+		respondWithError(w, http.StatusForbidden, err.Error())
+
+	} else if userID != id {
+		respondWithError(w, http.StatusUnauthorized, err.Error())
+	}
 
 	snippet := Snippet{}
 
@@ -462,10 +501,18 @@ func (a *App) updateSnippet(w http.ResponseWriter, r *http.Request) {
 	//   '401':
 	//      description: authorization failed
 
-	//userID := chi.URLParam(r, "userID")
+	id := chi.URLParam(r, "userID")
 	snippetID := chi.URLParam(r, "snippetID")
 
-	// TODO: check if user id checks out with authorization
+	tokenString := r.Header.Get("Authorization")
+	userID, err := validateJwtToken(tokenString)
+
+	if err != nil {
+		respondWithError(w, http.StatusForbidden, err.Error())
+
+	} else if userID != id {
+		respondWithError(w, http.StatusUnauthorized, err.Error())
+	}
 
 	snippet := Snippet{}
 
@@ -522,10 +569,18 @@ func (a *App) deleteSnippet(w http.ResponseWriter, r *http.Request) {
 	//   '401':
 	//      description: authorization failed
 
-	//userID := chi.URLParam(r, "userID")
+	id := chi.URLParam(r, "userID")
 	val := chi.URLParam(r, "snippetID")
 
-	// TODO: check if user id checks out with authorization
+	tokenString := r.Header.Get("Authorization")
+	userID, err := validateJwtToken(tokenString)
+
+	if err != nil {
+		respondWithError(w, http.StatusForbidden, err.Error())
+
+	} else if userID != id {
+		respondWithError(w, http.StatusUnauthorized, err.Error())
+	}
 
 	p := Snippet{ID: val}
 	if err := p.deleteSnippet(a.DB); err != nil {
