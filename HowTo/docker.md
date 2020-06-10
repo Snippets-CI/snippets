@@ -20,7 +20,19 @@ Credentials:
 | Password:  | `123`        |
 | Database:  |              |
 
-Quick docker startup command:  
+
+# Postgres & pgAdmin
+
+| Label      | Inputfield   |
+|------------|--------------|
+| Host name/address: | `db` |
+| port:  | `5432`           |
+| username:  | `admin`      |
+| password:  |   `123`      |
+
+Adminer can be reached from [localhost](localhost:5050).  
+
+# Quick docker startup command:  
 
 > docker run --name postgres-snippets -e POSTGRES_PASSWORD=123 -d -p 5432:5432 postgres
 

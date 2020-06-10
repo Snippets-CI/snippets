@@ -13,8 +13,6 @@ env:
   global:
     - ELECTRON_CACHE=$HOME/.cache/electron
     - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
-
-env:
   DOCKER_COMPOSE_VERSION: 1.25.5
   NODE_PATH: /home/travis/build/AndreasRoither/Snippets/ElectronApp/Snippets/node_modules
 
@@ -23,72 +21,72 @@ git:
 
 branches:
   only:
-  - master
-
-addons:
-  sonarcloud:
-    organization: "andreasroither" # the key of the org you chose at step #3
-    token: $SONAR_TOKEN # encrypted value of your token
+    - master
 
 stages:
   - sonarcloud
   - build docker
   - build electron
-  - test docker
   - test rest api
 
 jobs:
   include:
     - stage: sonarcloud
       name: "Sonarcloud code analysis"
+      addons:
+        sonarcloud:
+          organization: "andreasroither" # the key of the org you chose at step #3
+          token: $SONAR_TOKEN # encrypted value of your token
       language: node_js
       node_js: 13
       script:
-        - cd ./ElectronApp/Snippets/ 
-        - npm install 
+        - cd ./ElectronApp/Snippets/
+        - npm install
         - cd ..
         - cd ..
         - sonar-scanner
     - stage: build docker
-      name: "Build docker image and push to dockerhub"
+      name: "Build docker images with tag and push to dockerhub/heroku"
       before_install:
         - sudo rm /usr/local/bin/docker-compose
         - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
         - chmod +x docker-compose
         - sudo mv docker-compose /usr/local/bin
-        - cd ./Postgres/
-        - docker volume create --name data -d local
-        - cd ..   
       script:
         - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-        - cd ./Postgres/
-        - docker-compose build -t $DOCKER_USERNAME/Snippets ./
+        - cd ./Docker/
+        - docker-compose up -d
         - docker images
         - GIT_SHA="$(git rev-parse --short HEAD)"
-        - docker tag $DOCKER_USERNAME/Snippets:latest $DOCKER_USERNAME/Snippets:$GIT_SHA
-        - docker push $DOCKER_USERNAME/Snippets:latest
-        - docker push $DOCKER_USERNAME/Snippets:$GIT_SHA
+        - docker tag dpage/pgadmin4:latest andreasroither/snippets_pgadmin:latest
+        - docker tag dpage/pgadmin4:latest andreasroither/snippets_pgadmin:$GIT_SHA
+        - docker tag docker_db:latest andreasroither/snippets_db:latest
+        - docker tag docker_db:latest andreasroither/snippets_db:$GIT_SHA
+        - docker push $DOCKER_USERNAME/snippets_db:latest
+        - docker push $DOCKER_USERNAME/snippets_db:$GIT_SHA
+        - docker push $DOCKER_USERNAME/snippets_pgadmin:latest
+        - docker push $DOCKER_USERNAME/snippets_pgadmin:$GIT_SHA
+        - docker tag $DOCKER_USERNAME/snippets_db:latest registry.heroku.com/$HEROKU_APP_NAME/snippets_db
+        - docker tag $DOCKER_USERNAME/snippets_pgadmin:latest registry.heroku.com/$HEROKU_APP_NAME/snippets_pgadmin
+        - echo "$HEROKU_AUTH_TOKEN" | docker login --username=_ --password-stdin registry.heroku.com
+        - docker push registry.heroku.com/$HEROKU_APP_NAME/web
+        - docker push registry.heroku.com/$HEROKU_APP_NAME/web
     - stage: build electron
       name: "Make electron app"
       os: windows
       language: node_js
       node_js: 13
-      script: 
-        - cd ./ElectronApp/Snippets/ 
-        - npm install 
       script:
+        - cd ./ElectronApp/Snippets/
+        - npm install
         - npm run make
-    - stage: test docker
     - stage: test rest api
       name: "Unit test Go RestAPI"
-      language: go 
-      go : 1.14.x
+      language: go
+      go: 1.14.x
       services:
-        - docker              
-      script: 
-        - docker run $DOCKER_USERNAME/Snippets:latest
+        - docker
+      script:
+        - docker run $DOCKER_USERNAME/snippets_db:latest
         - cd ./GoRestAPI/
-        - go test -v     
-    
-after_script:
-  - docker-compose down
+        - go test -v
