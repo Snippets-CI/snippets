@@ -32,8 +32,10 @@ addons:
 
 stages:
   - sonarcloud
-  - testing
-  - build
+  - build docker
+  - build electron
+  - test docker
+  - test rest api
 
 jobs:
   include:
@@ -47,12 +49,8 @@ jobs:
         - cd ..
         - cd ..
         - sonar-scanner
-    - stage: testing
-      name: "Unit test GoRestAPI"
-      language: go 
-      go : 1.14.x
-      services:
-        - docker
+    - stage: build docker
+      name: "Build docker image and push to dockerhub"
       before_install:
         - sudo rm /usr/local/bin/docker-compose
         - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
@@ -60,20 +58,37 @@ jobs:
         - sudo mv docker-compose /usr/local/bin
         - cd ./Postgres/
         - docker volume create --name data -d local
-        - docker-compose up -d --build
-        - cd ..                  
-      script: 
-        - cd ./GoRestAPI/
-        - go test -v     
-    - stage: build
-      name: "Electron build"
+        - cd ..   
+      script:
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        - cd ./Postgres/
+        - docker-compose build -t $DOCKER_USERNAME/Snippets ./
+        - docker images
+        - GIT_SHA="$(git rev-parse --short HEAD)"
+        - docker tag $DOCKER_USERNAME/Snippets:latest $DOCKER_USERNAME/Snippets:$GIT_SHA
+        - docker push $DOCKER_USERNAME/Snippets:latest
+        - docker push $DOCKER_USERNAME/Snippets:$GIT_SHA
+    - stage: build electron
+      name: "Make electron app"
       os: windows
       language: node_js
       node_js: 13
       script: 
         - cd ./ElectronApp/Snippets/ 
         - npm install 
+      script:
         - npm run make
-
+    - stage: test docker
+    - stage: test rest api
+      name: "Unit test Go RestAPI"
+      language: go 
+      go : 1.14.x
+      services:
+        - docker              
+      script: 
+        - docker run $DOCKER_USERNAME/Snippets:latest
+        - cd ./GoRestAPI/
+        - go test -v     
+    
 after_script:
   - docker-compose down
