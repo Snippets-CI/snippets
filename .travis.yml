@@ -60,8 +60,8 @@ jobs:
         - GIT_SHA="$(git rev-parse --short HEAD)"
         - docker tag dpage/pgadmin4:latest andreasroither/snippets_pgadmin:latest
         - docker tag dpage/pgadmin4:latest andreasroither/snippets_pgadmin:$GIT_SHA
-        - docker tag snippets_restapi:latest andreasroither/snippets_restapi:latest
-        - docker tag snippets_restapi:latest andreasroither/snippets_restapi:$GIT_SHA
+        - docker tag snippet_restapi:latest andreasroither/snippets_restapi:latest
+        - docker tag snippet_restapi:latest andreasroither/snippets_restapi:$GIT_SHA
         - docker tag snippets_db:latest andreasroither/snippets_db:latest
         - docker tag snippets_db:latest andreasroither/snippets_db:$GIT_SHA
         - docker push $DOCKER_USERNAME/snippets_pgadmin:latest
