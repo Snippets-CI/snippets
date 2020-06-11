@@ -23,6 +23,11 @@ branches:
   only:
     - master
 
+deploy:
+  app: $HEROKU_APP_NAME
+  provider: heroku
+  api_key: $HEROKU_AUTH_TOKEN
+
 stages:
   - sonarcloud
   - build docker
@@ -46,7 +51,7 @@ jobs:
         - cd ..
         - sonar-scanner
     - stage: build docker
-      name: "Build docker images with tag and push to dockerhub/heroku"
+      name: "Build docker images with tag and push to dockerhub/heroku deploy"
       before_install:
         - sudo rm /usr/local/bin/docker-compose
         - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
@@ -60,17 +65,16 @@ jobs:
         - GIT_SHA="$(git rev-parse --short HEAD)"
         - docker tag dpage/pgadmin4:latest andreasroither/snippets_pgadmin:latest
         - docker tag dpage/pgadmin4:latest andreasroither/snippets_pgadmin:$GIT_SHA
-        - docker tag docker_db:latest andreasroither/snippets_db:latest
-        - docker tag docker_db:latest andreasroither/snippets_db:$GIT_SHA
-        - docker push $DOCKER_USERNAME/snippets_db:latest
-        - docker push $DOCKER_USERNAME/snippets_db:$GIT_SHA
+        - docker tag snippets_restapi:latest andreasroither/snippets_restapi:latest
+        - docker tag snippets_restapi:latest andreasroither/snippets_restapi:$GIT_SHA
+        - docker tag snippets_db:latest andreasroither/snippets_db:latest
+        - docker tag snippets_db:latest andreasroither/snippets_db:$GIT_SHA
         - docker push $DOCKER_USERNAME/snippets_pgadmin:latest
         - docker push $DOCKER_USERNAME/snippets_pgadmin:$GIT_SHA
-        - docker tag $DOCKER_USERNAME/snippets_db:latest registry.heroku.com/$HEROKU_APP_NAME/snippets_db
-        - docker tag $DOCKER_USERNAME/snippets_pgadmin:latest registry.heroku.com/$HEROKU_APP_NAME/snippets_pgadmin
-        - echo "$HEROKU_AUTH_TOKEN" | docker login --username=_ --password-stdin registry.heroku.com
-        - docker push registry.heroku.com/$HEROKU_APP_NAME/web
-        - docker push registry.heroku.com/$HEROKU_APP_NAME/web
+        - docker push $DOCKER_USERNAME/snippets_restapi:latest
+        - docker push $DOCKER_USERNAME/snippets_restapi:$GIT_SHA
+        - docker push $DOCKER_USERNAME/snippets_db:latest
+        - docker push $DOCKER_USERNAME/snippets_db:$GIT_SHA
     - stage: build electron
       name: "Make electron app"
       os: windows

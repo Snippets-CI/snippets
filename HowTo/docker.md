@@ -25,7 +25,7 @@ Credentials:
 
 | Label      | Inputfield   |
 |------------|--------------|
-| Host name/address: | `db` |
+| Host name/address: | `snippets_postgres_db` |
 | port:  | `5432`           |
 | username:  | `admin`      |
 | password:  |   `123`      |

@@ -1,0 +1,81 @@
+* [33m1018877[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m Update travis
+* [33m07dc831[m Add dockerfiles
+* [33m1555c49[m Update travis
+[31m|[m * [33mde63726[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m Update travis
+[31m|[m * [33mb079b6d[m Add dockerfiles
+[31m|[m * [33md980e24[m Update travis
+[31m|[m * [33mb15bed3[m Update travis
+[31m|[m * [33mcd3fb74[m Update travis
+[31m|[m[31m/[m  
+* [33m7cc4856[m[33m ([m[1;31morigin/dev[m[33m, [m[1;32mdev[m[33m)[m Update image pipeline
+* [33m49ca027[m Fix travis file Update electron app dependencies Remove sql file
+* [33m7dcf88b[m Add alert for login
+* [33mc6bed47[m Add logout
+* [33mfecf030[m Add sonarcloud integration
+* [33m259e4f4[m adds jwt token to every request
+*   [33m6ec0802[m Merge branch 'dev' of https://github.com/AndreasRoither/Snippets into dev
+[33m|[m[34m\[m  
+[33m|[m * [33m1a348cf[m Fix sonarcloud issues for electron
+* [34m|[m [33mfd1bb40[m Adds token validation to all routes
+[34m|[m[34m/[m  
+* [33md7b6b4d[m adds token validation to getSnippets
+* [33mc0e5db7[m generate JWT at login
+* [33m2c4e2b4[m Remvoes unused import
+* [33med4b377[m adds visual feedback to login page
+* [33m0c116b4[m Removes unused import
+* [33mbb70a47[m Adds sign up function
+* [33m83ceb83[m Adds password hashing
+* [33m04cafaf[m Fix share popover not closing
+* [33m0af45f4[m Snippet title changeable, snippet updates/saving
+* [33mc6f7a32[m Update electron style
+* [33m4d4c04b[m Update electron how to
+* [33md7b795d[m Change default db for rest api
+* [33m8c6b7ba[m Update dtos with correct properties
+* [33ma1a2949[m Add selectpicker types for typescript
+* [33m2204a41[m Add travis option to only trigger on master pushes
+* [33m53072ba[m Add travis build image Fix missing volume for travis ci Add travis jobs/stages Add stage order for travis Add windows packaging Fix travis
+* [33ma99d797[m Add travis for go rest api
+* [33m83c1adb[m Add missing test cases
+* [33m65ba38e[m Fix rest api tests
+* [33m222828e[m Remove mockup data
+*   [33ma2b3694[m Merge branch 'master' of https://github.com/AndreasRoither/Snippets
+[35m|[m[36m\[m  
+[35m|[m * [33m2ee08ec[m Swagger rest api integration
+[35m|[m * [33m2537668[m Add swagger
+* [36m|[m [33m7243e9d[m get login form data
+[36m|[m[36m/[m  
+* [33m7872603[m Update electron how to
+*   [33m7439d5f[m Merge branch 'master' of https://github.com/AndreasRoither/Snippets
+[1;31m|[m[1;32m\[m  
+[1;31m|[m * [33mfd0f2b7[m Add rest api tests
+* [1;32m|[m [33mc8ccaac[m Adds Bootstrap Login Modal
+[1;32m|[m[1;32m/[m  
+* [33mb5cde3d[m Add requests for rest api
+* [33m8d3c297[m Add language selection feature
+* [33md7ab852[m adjusts config files
+*   [33m7503f43[m Merge branch 'master' of https://github.com/AndreasRoither/Snippets
+[1;33m|[m[1;34m\[m  
+[1;33m|[m * [33m497a82f[m Fix wrong json display
+[1;33m|[m * [33mb112803[m Add postgres and adminer via docker-compose
+[1;33m|[m * [33m48c6a48[m Properly create go project
+[1;33m|[m * [33md899916[m Fix go project folder path/project
+* [1;34m|[m [33m611d2e9[m Redesign login
+[1;34m|[m[1;34m/[m  
+* [33m6e2cb0e[m create login
+* [33m4ee26de[m updates sql dump
+* [33m89ab04a[m added sql dump
+* [33m683f6ec[m Adds cockroachdb howto
+* [33m7ec2ad8[m Add bootstrap4
+* [33m233e931[m Adds new routes to rest api
+* [33m406ddde[m adds new route to go rest api
+* [33m07bce44[m Add electron app and go setup steps
+* [33m6d34726[m Reformat
+* [33m706b48e[m Add monaco code editor
+* [33mcf1505a[m Add HowTo files
+* [33m270e0e7[m Add axios for requests
+* [33m04edf7e[m Add babel
+* [33m89af78a[m Init electron base app
+* [33m664a4b1[m Add electron gitignore
+* [33m53e703a[m Add basic go rest function
+* [33m7712d92[m Add go gitignore
+* [33m11fcba0[m Initial commit

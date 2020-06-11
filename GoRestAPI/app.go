@@ -30,7 +30,7 @@ func (a *App) Initialize(user, password, dbname string, middlewareEnabled bool) 
 	fmt.Println("[*] Initialize...")
 
 	connectionString :=
-		fmt.Sprintf("user=%s password=%s dbname=%s host=db sslmode=disable", user, password, dbname)
+		fmt.Sprintf("user=%s password=%s dbname=%s host=snippets_postgres_db sslmode=disable", user, password, dbname)
 
 	var err error
 	a.DB, err = sql.Open("postgres", connectionString)
