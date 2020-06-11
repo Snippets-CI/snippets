@@ -24,10 +24,13 @@ type App struct {
 
 // Initialize app and connect to db
 func (a *App) Initialize(user, password, dbname string, middlewareEnabled bool) {
+	fmt.Println("[*] Waiting for db to settle...")
+	time.Sleep(2 * time.Second)
+
 	fmt.Println("[*] Initialize...")
 
 	connectionString :=
-		fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", user, password, dbname)
+		fmt.Sprintf("user=%s password=%s dbname=%s host=db sslmode=disable", user, password, dbname)
 
 	var err error
 	a.DB, err = sql.Open("postgres", connectionString)
@@ -52,7 +55,7 @@ func (a *App) Initialize(user, password, dbname string, middlewareEnabled bool) 
 // Run http listen and serve
 func (a *App) Run(addr string) {
 	fmt.Println("[*] ListenAndServe...")
-	log.Fatal(http.ListenAndServe(":8010", a.Router))
+	log.Fatal(http.ListenAndServe(addr, a.Router))
 }
 
 func (a *App) initializeRoutes() {

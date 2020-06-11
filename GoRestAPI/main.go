@@ -28,6 +28,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	_ "github.com/lib/pq"
 )
@@ -43,7 +44,7 @@ func main() {
 	a := App{}
 
 	// should be done by os.Getenv("")
-	a.Initialize("admin", "123", "postgres", true)
+	a.Initialize(os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("POSTGRES_DB"), true)
 
-	a.Run(":8000")
+	a.Run(":" + os.Getenv("REST_API_PORT"))
 }

@@ -7,6 +7,10 @@ LABEL maintainer='andreas.roither@protonmail.com'
 # add the 'postgres' admin role
 USER postgres
 
+# Copy sql files to the docker entrypoint, it automatically connects and starts psql
+# so we don't have to write anything specific in the sql file, just the sql commands
+ADD createTables.sql /docker-entrypoint-initdb.d/
+
 # expose Postgres port
 EXPOSE 5432
 
