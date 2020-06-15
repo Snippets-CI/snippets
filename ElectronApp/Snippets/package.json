@@ -1,7 +1,7 @@
 {
   "name": "snippets",
   "productName": "snippets",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Electron app to store all kinds of snippets",
   "main": ".webpack/main",
   "scripts": {

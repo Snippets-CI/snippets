@@ -21,18 +21,21 @@ git:
 
 branches:
   only:
-    - master
+  - master
+  - /v\d+\.\d+\.\d+/
 
 stages:
   - sonarcloud
   - publish electron
   - build docker
+  - build docker and deploy to heroku
   - test rest api
 
 jobs:
   include:
     - stage: sonarcloud
       name: "Sonarcloud code analysis"
+      if: tag IS NOT present
       addons:
         sonarcloud:
           organization: "andreasroither"
@@ -45,8 +48,9 @@ jobs:
         - cd ..
         - cd ..
         - sonar-scanner
-    - stage: build docker
-      name: "Build docker images with tag and push to dockerhub/heroku deploy"
+    - stage: build docker and deploy to heroku
+      name: "Build docker images with versioning tag and deploy to heroku"
+      if: tag IS present
       before_install:
         - sudo rm /usr/local/bin/docker-compose
         - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
@@ -55,7 +59,37 @@ jobs:
       script:
         - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
         - cd ./Docker/
-        - docker-compose up -d
+        - docker-compose up --build -d
+        - docker images
+        - docker tag dpage/pgadmin4:latest andreasroither/snippets_pgadmin:latest
+        - docker tag dpage/pgadmin4:latest andreasroither/snippets_pgadmin:$TRAVIS_TAG
+        - docker tag snippet_restapi:latest andreasroither/snippets_restapi:latest
+        - docker tag snippet_restapi:latest andreasroither/snippets_restapi:$TRAVIS_TAG
+        - docker tag snippets_db:latest andreasroither/snippets_db:latest
+        - docker tag snippets_db:latest andreasroither/snippets_db:$TRAVIS_TAG
+        - docker push $DOCKER_USERNAME/snippets_pgadmin:latest
+        - docker push $DOCKER_USERNAME/snippets_pgadmin:$TRAVIS_TAG
+        - docker push $DOCKER_USERNAME/snippets_restapi:latest
+        - docker push $DOCKER_USERNAME/snippets_restapi:$TRAVIS_TAG
+        - docker push $DOCKER_USERNAME/snippets_db:latest
+        - docker push $DOCKER_USERNAME/snippets_db:$TRAVIS_TAG
+      deploy:
+        app: $HEROKU_APP_NAME
+        provider: heroku
+        skip_cleanup: true
+        api_key: $HEROKU_AUTH_TOKEN
+    - stage: build docker
+      name: "Build docker images with git sha tag"
+      if: tag IS NOT present
+      before_install:
+        - sudo rm /usr/local/bin/docker-compose
+        - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+        - chmod +x docker-compose
+        - sudo mv docker-compose /usr/local/bin
+      script:
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        - cd ./Docker/
+        - docker-compose up --build -d
         - docker images
         - GIT_SHA="$(git rev-parse --short HEAD)"
         - docker tag dpage/pgadmin4:latest andreasroither/snippets_pgadmin:latest
@@ -70,13 +104,9 @@ jobs:
         - docker push $DOCKER_USERNAME/snippets_restapi:$GIT_SHA
         - docker push $DOCKER_USERNAME/snippets_db:latest
         - docker push $DOCKER_USERNAME/snippets_db:$GIT_SHA
-      deploy:
-        app: $HEROKU_APP_NAME
-        provider: heroku
-        skip_cleanup: true
-        api_key: $HEROKU_AUTH_TOKEN
     - stage: publish electron
       name: "Build and publish electron app on github"
+      if: tag IS present
       os: windows
       language: node_js
       node_js: 13
@@ -102,3 +132,7 @@ jobs:
         - docker run $DOCKER_USERNAME/snippets_db:latest
         - cd ./GoRestAPI/
         - go test -v
+
+notifications:
+  on_success: change
+  on_failure: always
