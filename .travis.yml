@@ -26,6 +26,7 @@ branches:
 
 stages:
   - sonarcloud
+  - make electron
   - publish electron
   - build docker
   - build docker and deploy to heroku
@@ -104,6 +105,16 @@ jobs:
         - docker push $DOCKER_USERNAME/snippets_restapi:$GIT_SHA
         - docker push $DOCKER_USERNAME/snippets_db:latest
         - docker push $DOCKER_USERNAME/snippets_db:$GIT_SHA
+    - stage: make electron
+      name: "Build electron app"
+      if: tag IS NOT present
+      os: windows
+      language: node_js
+      node_js: 13
+      script:
+        - cd ./ElectronApp/Snippets/
+        - npm install
+        - npm run make
     - stage: publish electron
       name: "Build and publish electron app on github"
       if: tag IS present
@@ -124,6 +135,7 @@ jobs:
           tags: true
     - stage: test rest api
       name: "Unit test Go RestAPI"
+      if: tag IS NOT present
       language: go
       go: 1.14.x
       services:
