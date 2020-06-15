@@ -25,8 +25,8 @@ branches:
 
 stages:
   - sonarcloud
+  - publish electron
   - build docker
-  - build electron
   - test rest api
 
 jobs:
@@ -35,8 +35,8 @@ jobs:
       name: "Sonarcloud code analysis"
       addons:
         sonarcloud:
-          organization: "andreasroither" # the key of the org you chose at step #3
-          token: $SONAR_TOKEN # encrypted value of your token
+          organization: "andreasroither"
+          token: $SONAR_TOKEN
       language: node_js
       node_js: 13
       script:
@@ -75,8 +75,8 @@ jobs:
         provider: heroku
         skip_cleanup: true
         api_key: $HEROKU_AUTH_TOKEN
-    - stage: build electron
-      name: "Make electron app"
+    - stage: publish electron
+      name: "Build and publish electron app on github"
       os: windows
       language: node_js
       node_js: 13
@@ -84,6 +84,14 @@ jobs:
         - cd ./ElectronApp/Snippets/
         - npm install
         - npm run make
+      deploy:
+        provider: releases
+        api_key: $GITHUB_OAUTH_TOKEN
+        file_glob: true
+        file: ./out/make/**/*.exe
+        skip_cleanup: true
+        on:
+          tags: true
     - stage: test rest api
       name: "Unit test Go RestAPI"
       language: go
