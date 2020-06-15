@@ -23,14 +23,14 @@ type App struct {
 }
 
 // Initialize app and connect to db
-func (a *App) Initialize(user, password, dbname string, middlewareEnabled bool) {
+func (a *App) Initialize(user, password, dbname string, dbhost string, middlewareEnabled bool) {
 	fmt.Println("[*] Waiting for db to settle...")
 	time.Sleep(2 * time.Second)
 
 	fmt.Println("[*] Initialize...")
 
 	connectionString :=
-		fmt.Sprintf("user=%s password=%s dbname=%s host=snippets_postgres_db sslmode=disable", user, password, dbname)
+		fmt.Sprintf("user=%s password=%s dbname=%s %s sslmode=disable", user, password, dbname, dbhost)
 
 	var err error
 	a.DB, err = sql.Open("postgres", connectionString)

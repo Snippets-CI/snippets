@@ -10,12 +10,15 @@ import (
 	"os"
 	"reflect"
 	"testing"
+
+	jwt "github.com/dgrijalva/jwt-go"
 )
 
 var a App
 
 var createdUser User
 var createdSnippet Snippet
+var currentAuthToken string
 
 const extensionQueryUUID = `
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -40,8 +43,16 @@ CREATE TABLE IF NOT EXISTS snippets (
 	code VARCHAR NULL
 )`
 
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
+}
+
 func TestMain(m *testing.M) {
-	a.Initialize("admin", "123", "postgres", false)
+
+	a.Initialize(getEnv("POSTGRES_USER", "admin"), getEnv("POSTGRES_PASSWORD", "123"), getEnv("POSTGRES_DB", "postgres"), getEnv("POSTGRES_HOST_NAME", "host=localhost"), false)
 	ensureExtensionExists()
 	ensureTablesExist()
 	clearTable()
@@ -110,21 +121,26 @@ func TestCreateUser(t *testing.T) {
 	response := executeRequest(req)
 	checkResponseCode(t, http.StatusCreated, response.Code)
 
-	var m map[string]interface{}
+	var m string
 	json.Unmarshal(response.Body.Bytes(), &m)
 
-	if m["mail"] != "test@mail" {
-		t.Errorf("Expected snippet name to be 'test@mail'. Got '%v'", m["mail"])
-	}
+	token, _ := jwt.Parse(m, func(token *jwt.Token) (interface{}, error) {
 
-	if m["username"] != "User1" {
-		t.Errorf("Expected snippet name to be 'User1'. Got '%v'", m["username"])
-	}
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
 
-	decoder := json.NewDecoder(response.Body)
-	if err := decoder.Decode(&createdUser); err != nil {
-		t.Errorf("Invalid request payload")
-		return
+		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
+		return []byte("secret"), nil
+	})
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		if claims["username"].(string) != "User1" {
+			t.Errorf("Expected snippet name to be 'User1'. Got '%v'", claims["username"])
+		}
+
+		createdUser = User{ID: claims["user_id"].(string), Name: claims["username"].(string)}
+		currentAuthToken = token.Raw
 	}
 }
 
@@ -139,6 +155,7 @@ func TestCreateSnippet(t *testing.T) {
 
 	req, _ := http.NewRequest("POST", fmt.Sprintf(`/user/%s/snippets`, createdUser.ID), bytes.NewBuffer(snippetMarshal))
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", currentAuthToken)
 
 	response := executeRequest(req)
 	checkResponseCode(t, http.StatusCreated, response.Code)
@@ -170,6 +187,7 @@ func TestCreateSnippet2(t *testing.T) {
 
 	req, _ := http.NewRequest("POST", fmt.Sprintf(`/user/%s/snippets`, createdUser.ID), bytes.NewBuffer(snippetMarshal))
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", currentAuthToken)
 
 	response := executeRequest(req)
 	checkResponseCode(t, http.StatusCreated, response.Code)
@@ -191,6 +209,7 @@ func TestCreateSnippet2(t *testing.T) {
 func TestGetSnippet(t *testing.T) {
 	connectionString := fmt.Sprintf(`/user/%s/snippets/%s`, createdUser.ID, createdSnippet.ID)
 	req, _ := http.NewRequest("GET", connectionString, nil)
+	req.Header.Set("Authorization", currentAuthToken)
 	response := executeRequest(req)
 
 	checkResponseCode(t, http.StatusOK, response.Code)
@@ -220,6 +239,7 @@ func TestUpdateSnippet(t *testing.T) {
 
 	req, _ := http.NewRequest("PUT", fmt.Sprintf(`/user/%s/snippets/%s`, createdUser.ID, createdSnippet.ID), bytes.NewBuffer(snippetMarshal))
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", currentAuthToken)
 
 	response := executeRequest(req)
 	checkResponseCode(t, http.StatusOK, response.Code)
@@ -240,12 +260,14 @@ func TestDeleteSnippet(t *testing.T) {
 
 	req, _ := http.NewRequest("DELETE", fmt.Sprintf(`/user/%s/snippets/%s`, createdUser.ID, createdSnippet.ID), nil)
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", currentAuthToken)
 
 	response := executeRequest(req)
 	checkResponseCode(t, http.StatusOK, response.Code)
 
 	req, _ = http.NewRequest("GET", fmt.Sprintf(`/user/%s/snippets/%s`, createdUser.ID, createdSnippet.ID), nil)
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", currentAuthToken)
 
 	response = executeRequest(req)
 	checkResponseCode(t, http.StatusNotFound, response.Code)
@@ -254,6 +276,7 @@ func TestDeleteSnippet(t *testing.T) {
 func TestGetSnippets(t *testing.T) {
 	connectionString := fmt.Sprintf(`/user/%s/snippets/`, createdUser.ID)
 	req, _ := http.NewRequest("GET", connectionString, nil)
+	req.Header.Set("Authorization", currentAuthToken)
 	response := executeRequest(req)
 
 	checkResponseCode(t, http.StatusOK, response.Code)

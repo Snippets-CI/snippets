@@ -141,7 +141,8 @@ jobs:
       services:
         - docker
       script:
-        - docker run $DOCKER_USERNAME/snippets_db:latest
+        - docker run -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD -e POSTGRES_USER=$POSTGRES_USER -e POSTGRES_DB=$POSTGRES_DB -d --name snippets_postgres_db -p 5432:5432 $DOCKER_USERNAME/snippets_db:latest 
+        - export POSTGRES_HOST_NAME=
         - cd ./GoRestAPI/
         - go test -v
 

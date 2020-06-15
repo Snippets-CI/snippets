@@ -45,6 +45,7 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: 123
       POSTGRES_DB: postgres
+      POSTGRES_HOST_NAME: host=snippets_postgres_db
       REST_API_PORT: 8010
     ports:
       - 8010:8010
