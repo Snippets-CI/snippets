@@ -6,21 +6,6 @@ https://docs.docker.com/compose/install/
 
 Enable file sharing for docker desktop first.
 
-# Postgres & Adminer
-Build and start in background:  
-docker-compose up -d
-
-Then adminer can be reached from [localhost](localhost:8000).  
-Credentials:  
-| Label      | Inputfield   |
-|------------|--------------|
-| System:    | `PostgreSQL` |
-| Server:    | `db`         |
-| Username:  | `admin`      |
-| Password:  | `123`        |
-| Database:  |              |
-
-
 # Postgres & pgAdmin
 
 | Label      | Inputfield   |
@@ -30,9 +15,9 @@ Credentials:
 | username:  | `admin`      |
 | password:  |   `123`      |
 
-Adminer can be reached from [localhost](localhost:5050).  
+pgAdmin can be reached from [localhost](localhost:5050).  
 
 # Quick docker startup command:  
 
-> docker run --name postgres-snippets -e POSTGRES_PASSWORD=123 -d -p 5432:5432 postgres
+> docker run -e POSTGRES_PASSWORD=123 -e POSTGRES_USER=admin -e POSTGRES_DB=postgres -d --name snippets_postgres_db -p 5432:5432 andreasroither/snippets_db:latest
 

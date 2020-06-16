@@ -31,6 +31,16 @@ Run:
 Run tests:  
 > go test -v
 
+##### Info
+
+Following env should be set for production:
+- POSTGRES_USER
+- POSTGRES_PASSWORD
+- POSTGRES_DB
+- POSTGRES_HOST_NAME
+
+POSTGRES_HOST_NAME depends on what the host is, if the rest api is running in a container together with a postgres container in the same network then this variable should be host=NAMEOFDOCKERCONTAINER
+
 #### Swagger
 
 Important:  
