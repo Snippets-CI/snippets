@@ -81,7 +81,7 @@ jobs:
         skip_cleanup: true
         api_key: $HEROKU_AUTH_TOKEN
     - stage: build docker
-      name: "Build docker images with git sha tag and (just for testing to deploy to heroku)"
+      name: "Build docker images with git sha tag and (just for testing to deploy to heroku)."
       if: tag IS NOT present
       before_install:
         - sudo rm /usr/local/bin/docker-compose
