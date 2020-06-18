@@ -106,6 +106,7 @@ jobs:
         - docker push $DOCKER_USERNAME/snippets_restapi:$GIT_SHA
         - docker push $DOCKER_USERNAME/snippets_db:latest
         - docker push $DOCKER_USERNAME/snippets_db:$GIT_SHA
+        - cd ..
       deploy:
         app: $HEROKU_APP_NAME
         provider: heroku
