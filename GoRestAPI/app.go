@@ -51,8 +51,8 @@ func (a *App) Initialize(user, password, dbname string, dbhost string, middlewar
 
 	a.initializeRoutes()
 
-	ensureTablesExist(a.DB)
 	ensureExtensionExists(a.DB)
+	ensureTablesExist(a.DB)
 }
 
 // Run http listen and serve
