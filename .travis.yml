@@ -80,6 +80,8 @@ jobs:
         provider: heroku
         skip_cleanup: true
         api_key: $HEROKU_AUTH_TOKEN
+        on:
+          tags: true
     - stage: build docker
       name: "Build docker images with git sha tag"
       if: tag IS NOT present
