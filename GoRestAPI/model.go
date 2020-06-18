@@ -2,9 +2,33 @@ package main
 
 import (
 	"database/sql"
+	"log"
 
 	"golang.org/x/crypto/bcrypt"
 )
+
+const extensionQueryUUID = `
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+`
+
+const tableCreationQueryUsers = `
+CREATE TABLE IF NOT EXISTS users (
+	user_id uuid PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+	username VARCHAR(25) NOT NULL,
+    mail VARCHAR(50) NOT NULL,
+	password VARCHAR(60) NOT NULL,
+    UNIQUE(mail)
+)`
+
+const tableCreationQuerySnippets = `
+CREATE TABLE IF NOT EXISTS snippets (
+	snippet_id uuid PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+	owner UUID REFERENCES users(user_id) NOT NULL,
+	language VARCHAR(20) NULL,
+	title VARCHAR(30) NULL,
+	category VARCHAR(50) NULL,
+	code VARCHAR NULL
+)`
 
 // Snippet from DB
 // HTTP status code 200 and Snippet
@@ -33,6 +57,22 @@ type User struct {
 type LoginCredentials struct {
 	Name     string `json:"username,omitempty" bson:"username,omitempty"`
 	Password string `json:"password,omitempty" bson:"password,omitempty"`
+}
+
+func ensureTablesExist(db *sql.DB) {
+	if _, err := db.Exec(tableCreationQueryUsers); err != nil {
+		log.Fatal(err)
+	}
+
+	if _, err := db.Exec(tableCreationQuerySnippets); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func ensureExtensionExists(db *sql.DB) {
+	if _, err := db.Exec(extensionQueryUUID); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (user *User) getUser(db *sql.DB) error {

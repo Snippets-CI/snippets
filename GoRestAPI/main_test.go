@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -20,29 +19,6 @@ var createdUser User
 var createdSnippet Snippet
 var currentAuthToken string
 
-const extensionQueryUUID = `
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-`
-
-const tableCreationQueryUsers = `
-CREATE TABLE IF NOT EXISTS users (
-	user_id uuid PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-	username VARCHAR(25) NOT NULL,
-    mail VARCHAR(50) NOT NULL,
-	password VARCHAR(60) NOT NULL,
-    UNIQUE(mail)
-)`
-
-const tableCreationQuerySnippets = `
-CREATE TABLE IF NOT EXISTS snippets (
-	snippet_id uuid PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-	owner UUID REFERENCES users(user_id) NOT NULL,
-	language VARCHAR(20) NULL,
-	title VARCHAR(30) NULL,
-	category VARCHAR(50) NULL,
-	code VARCHAR NULL
-)`
-
 func getEnv(key, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok {
 		return value
@@ -53,30 +29,12 @@ func getEnv(key, fallback string) string {
 func TestMain(m *testing.M) {
 
 	a.Initialize(getEnv("POSTGRES_USER", "admin"), getEnv("POSTGRES_PASSWORD", "123"), getEnv("POSTGRES_DB", "postgres"), getEnv("POSTGRES_HOST_NAME", "host=localhost"), false)
-	ensureExtensionExists()
-	ensureTablesExist()
 	clearTable()
 
 	code := m.Run()
 
 	clearTable()
 	os.Exit(code)
-}
-
-func ensureExtensionExists() {
-	if _, err := a.DB.Exec(extensionQueryUUID); err != nil {
-		log.Fatal(err)
-	}
-}
-
-func ensureTablesExist() {
-	if _, err := a.DB.Exec(tableCreationQueryUsers); err != nil {
-		log.Fatal(err)
-	}
-
-	if _, err := a.DB.Exec(tableCreationQuerySnippets); err != nil {
-		log.Fatal(err)
-	}
 }
 
 // Order is important, as tables with fks need to be deleted first

@@ -25,7 +25,7 @@ type App struct {
 // Initialize app and connect to db
 func (a *App) Initialize(user, password, dbname string, dbhost string, middlewareEnabled bool) {
 	fmt.Println("[*] Waiting for db to settle...")
-	time.Sleep(2 * time.Second)
+	time.Sleep(3 * time.Second)
 
 	fmt.Println("[*] Initialize...")
 
@@ -50,6 +50,9 @@ func (a *App) Initialize(user, password, dbname string, dbhost string, middlewar
 	a.Router.Use(middleware.Timeout(60 * time.Second))
 
 	a.initializeRoutes()
+
+	ensureTablesExist(a.DB)
+	ensureExtensionExists(a.DB)
 }
 
 // Run http listen and serve
