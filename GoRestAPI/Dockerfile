@@ -1,5 +1,5 @@
 # Start from golang base image
-FROM golang:1.14-alpine as builder
+FROM golang:1.15-alpine as builder
  
 # Set maintainer label: maintainer=[YOUR-EMAIL]
 LABEL maintainer='andreas.roither@protonmail.com'
