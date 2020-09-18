@@ -92,7 +92,7 @@
     "style-loader": "1.2.1",
     "ts-loader": "8.0.3",
     "typescript": "3.9.7",
-    "webpack": "4.44.1"
+    "webpack": "4.44.2"
   },
   "dependencies": {
     "@types/bootstrap-select": "^1.11.1",
