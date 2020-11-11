@@ -76,7 +76,7 @@
     "@types/jwt-decode": "2.2.1",
     "@typescript-eslint/eslint-plugin": "3.10.1",
     "@typescript-eslint/parser": "3.10.1",
-    "babel-loader": "8.1.0",
+    "babel-loader": "8.2.1",
     "css-loader": "4.3.0",
     "electron": "9.3.4",
     "eslint": "7.13.0",
