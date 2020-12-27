@@ -1,0 +1,13 @@
+steps:
+ # Build the container image
+ - name: 'eu.gcr.io/cloud-builders/docker'
+   args: ['build', '-t', 'eu.gcr.io/$PROJECT_ID/rest-api:$TAG_NAME', '-f', './GoRestApi/', '.']
+ # Push the container image to Container Registry
+ - name: 'eu.gcr.io/cloud-builders/docker'
+   args: ['push', 'eu.gcr.io/$PROJECT_ID/rest-api:$TAG_NAME']
+ # Deploy container image to Cloud Run
+ - name: 'eu.gcr.io/google.com/cloudsdktool/cloud-sdk'
+   entrypoint: gcloud
+   args: ['run', 'deploy', 'rest-api', '--image', 'eu.gcr.io/$PROJECT_ID/rest-api:$TAG_NAME', '--region', 'europe-west1', '--platform', 'managed', '--allow-unauthenticated']
+images:
+ - 'eu.gcr.io/$PROJECT_ID/rest-api:$TAG_NAME'
