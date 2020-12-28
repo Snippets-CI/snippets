@@ -4,7 +4,7 @@ steps:
     id: '1.27.4'
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
-    args: ['-c', 'docker tag snippets_db:latest eu.gcr.io/$PROJECT_ID/snippets_postgres_db:$TAG_NAME']
+    args: ['-c', 'docker tag snippets_db:latest eu.gcr.io/$PROJECT_ID/snippets_db:$TAG_NAME']
     wait_for: ['1.27.4']
   - name: "gcr.io/cloud-builders/docker"
     entrypoint: 'bash'
