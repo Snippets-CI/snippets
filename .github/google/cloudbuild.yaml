@@ -10,7 +10,7 @@ steps:
         "Dockerfile",
         ".",
       ]
-    dir: 'GoRestApi'
+    dir: 'GoRestAPI'
     env:
       - "POSTGRES_DB=${_POSTGRES_DB}"
       - "POSTGRES_PASSWORD=${_POSTGRES_PASSWORD}"
