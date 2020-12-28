@@ -2,30 +2,17 @@ steps:
   - name: "docker/compose:1.27.4"
     args: ["up", "-d", "--build"]
     id: '1.27.4'
-  # re-tag images
-  - name: "gcr.io/cloud-builders/docker"
-    args:
-      [
-        "tag",
-        "snippets_db:latest",
-        "eu.gcr.io/$PROJECT_ID/snippets_db:$TAG_NAME",
-      ]
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args: ['-c', 'docker tag snippets_db:latest eu.gcr.io/$PROJECT_ID/snippets_db:$TAG_NAME']
     wait_for: ['1.27.4']
   - name: "gcr.io/cloud-builders/docker"
-    args:
-      [
-        "tag",
-        "snippet_pgadmin:latest",
-        "eu.gcr.io/$PROJECT_ID/snippet_pgadmin:$TAG_NAME",
-      ]
+    entrypoint: 'bash'
+    args: ['-c', 'docker tag snippet_pgadmin:latest eu.gcr.io/$PROJECT_ID/snippet_pgadmin:$TAG_NAME']
     wait_for: ['1.27.4']
   - name: "gcr.io/cloud-builders/docker"
-    args:
-      [
-        "tag",
-        "snippet_restapi:latest",
-        "eu.gcr.io/$PROJECT_ID/snippet_restapi:$TAG_NAME",
-      ]
+    entrypoint: 'bash'
+    args: ['-c', 'docker tag snippet_restapi:latest eu.gcr.io/$PROJECT_ID/snippet_restapi:$TAG_NAME']
     wait_for: ['1.27.4']
 images:
   - "eu.gcr.io/$PROJECT_ID/snippets_db:$TAG_NAME"
