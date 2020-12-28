@@ -5,8 +5,7 @@ steps:
     args:
       [
         "build",
-        "-t",
-        "eu.gcr.io/$PROJECT_ID/snippet_restapi:$TAG_NAME",
+        "--tag=eu.gcr.io/$PROJECT_ID/snippet_restapi:$TAG_NAME",
         "-f",
         "Dockerfile",
         ".",
@@ -24,8 +23,7 @@ steps:
     args:
       [
         "build",
-        "-t",
-        "eu.gcr.io/$PROJECT_ID/snippet_pgadmin:$TAG_NAME",
+        "--tag=eu.gcr.io/$PROJECT_ID/snippet_pgadmin:$TAG_NAME",
         "-f",
         "Dockerfile",
         ".",
@@ -42,8 +40,7 @@ steps:
     args:
       [
         "build",
-        "-t",
-        "eu.gcr.io/$PROJECT_ID/snippets_db:$TAG_NAME",
+        "--tag=eu.gcr.io/$PROJECT_ID/snippets_db:$TAG_NAME",
         "-f",
         "Dockerfile",
         ".",
