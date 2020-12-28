@@ -22,8 +22,9 @@ services:
       - postgres:/data/postgres
 
   pgadmin:
-    container_name: snippet_pgadmin
-    image: dpage/pgadmin4
+    build: ./PGAdmin/
+    container_name: snippets_pgadmin
+    image: snippets_pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
@@ -38,9 +39,9 @@ services:
       - postgres_db
     
   restapi:
-    container_name: snippet_restapi
+    container_name: snippets_restapi
     build: ./GoRestAPI/
-    image: snippet_restapi
+    image: snippets_restapi
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: 123
