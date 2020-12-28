@@ -2,11 +2,11 @@ steps:
  - name: 'docker/compose:1.27.4'
    args: ['up', '-d']
  # Push the container image to Container Registry
- - name: 'eu.gcr.io/cloud-builders/docker'
+ - name: 'gcr.io/cloud-builders/docker'
    args: ['push', 'eu.gcr.io/$PROJECT_ID/snippets_db:$TAG_NAME']
- - name: 'eu.gcr.io/cloud-builders/docker'
+ - name: 'gcr.io/cloud-builders/docker'
    args: ['push', 'eu.gcr.io/$PROJECT_ID/snippet_pgadmin:$TAG_NAME']
- - name: 'eu.gcr.io/cloud-builders/docker'
+ - name: 'gcr.io/cloud-builders/docker'
    args: ['push', 'eu.gcr.io/$PROJECT_ID/snippet_restapi:$TAG_NAME']
 images:
  - 'eu.gcr.io/$PROJECT_ID/snippets_db:$TAG_NAME'
