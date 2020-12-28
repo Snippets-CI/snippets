@@ -4,18 +4,24 @@ steps:
   # re-tag images
   - name: "gcr.io/cloud-builders/docker"
     args:
-      ["tag", "snippets_db:latest eu.gcr.io/$PROJECT_ID/snippets_db:$TAG_NAME"]
-  - name: "gcr.io/cloud-builders/docker"
-    args:
       [
         "tag",
-        "snippet_pgadmin:latest eu.gcr.io/$PROJECT_ID/snippet_pgadmin:$TAG_NAME",
+        "snippets_db:latest",
+        "eu.gcr.io/$PROJECT_ID/snippets_db:$TAG_NAME",
       ]
   - name: "gcr.io/cloud-builders/docker"
     args:
       [
         "tag",
-        "snippet_restapi:latest eu.gcr.io/$PROJECT_ID/snippet_restapi:$TAG_NAME",
+        "snippet_pgadmin:latest",
+        "eu.gcr.io/$PROJECT_ID/snippet_pgadmin:$TAG_NAME",
+      ]
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "tag",
+        "snippet_restapi:latest",
+        "eu.gcr.io/$PROJECT_ID/snippet_restapi:$TAG_NAME",
       ]
   # Push the container image to Container Registry
   - name: "gcr.io/cloud-builders/docker"
