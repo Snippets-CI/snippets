@@ -8,9 +8,10 @@ steps:
         "-t",
         "eu.gcr.io/$PROJECT_ID/snippet_restapi:$TAG_NAME",
         "-f",
-        "./GoRestApi/Dockerfile",
+        "Dockerfile",
         ".",
       ]
+    dir: 'GoRestApi'
     env:
       - "POSTGRES_DB=${_POSTGRES_DB}"
       - "POSTGRES_PASSWORD=${_POSTGRES_PASSWORD}"
@@ -26,9 +27,10 @@ steps:
         "-t",
         "eu.gcr.io/$PROJECT_ID/snippet_pgadmin:$TAG_NAME",
         "-f",
-        "./PGAdmin/Dockerfile",
+        "Dockerfile",
         ".",
       ]
+    dir: 'PGAdmin'
     env:
       - "PGADMIN_DEFAULT_EMAIL=${_PGADMIN_DEFAULT_EMAIL}"
       - "PGADMIN_DEFAULT_PASSWORD=${_PGADMIN_DEFAULT_PASSWORD}"
@@ -43,9 +45,10 @@ steps:
         "-t",
         "eu.gcr.io/$PROJECT_ID/snippets_db:$TAG_NAME",
         "-f",
-        "./Docker/postgres/Dockerfile",
+        "Dockerfile",
         ".",
       ]
+    dir: 'Docker/postgres'
     env:
       - "POSTGRES_USER=${_POSTGRES_USER}"
       - "POSTGRES_PASSWORD=${_POSTGRES_PASSWORD}"
