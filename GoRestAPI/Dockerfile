@@ -26,9 +26,9 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /app/
 
 # Copy the Pre-built binary file from the previous stage.
-COPY --from=builder /app/Snippets .
- 
+COPY --from=builder /app/snippets .
+
 EXPOSE 8010
  
 # Run the service myapp when a container of this image is launched
-CMD ["./Snippets"]
+CMD ["./snippets"]

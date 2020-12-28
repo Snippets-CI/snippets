@@ -1,13 +1,14 @@
 steps:
- # Build the container image
- - name: 'eu.gcr.io/cloud-builders/docker'
-   args: ['build', '-t', 'eu.gcr.io/$PROJECT_ID/rest-api:$TAG_NAME', '-f', './GoRestApi/', '.']
+ - name: ‘docker/compose:1.27.4’
+   args: [‘up’, ‘-d’]
  # Push the container image to Container Registry
  - name: 'eu.gcr.io/cloud-builders/docker'
-   args: ['push', 'eu.gcr.io/$PROJECT_ID/rest-api:$TAG_NAME']
- # Deploy container image to Cloud Run
- - name: 'eu.gcr.io/google.com/cloudsdktool/cloud-sdk'
-   entrypoint: gcloud
-   args: ['run', 'deploy', 'rest-api', '--image', 'eu.gcr.io/$PROJECT_ID/rest-api:$TAG_NAME', '--region', 'europe-west1', '--platform', 'managed', '--allow-unauthenticated']
+   args: ['push', 'eu.gcr.io/$PROJECT_ID/snippets_db:$TAG_NAME']
+ - name: 'eu.gcr.io/cloud-builders/docker'
+   args: ['push', 'eu.gcr.io/$PROJECT_ID/snippet_pgadmin:$TAG_NAME']
+ - name: 'eu.gcr.io/cloud-builders/docker'
+   args: ['push', 'eu.gcr.io/$PROJECT_ID/snippet_restapi:$TAG_NAME']
 images:
- - 'eu.gcr.io/$PROJECT_ID/rest-api:$TAG_NAME'
+ - 'eu.gcr.io/$PROJECT_ID/snippets_db:$TAG_NAME'
+ - 'eu.gcr.io/$PROJECT_ID/snippet_pgadmin:$TAG_NAME'
+ - 'eu.gcr.io/$PROJECT_ID/snippet_restapi:$TAG_NAME'
