@@ -8,7 +8,7 @@ steps:
         "-t",
         "eu.gcr.io/$PROJECT_ID/snippet_restapi:$TAG_NAME",
         "-f",
-        "./GoRestApi/",
+        "./GoRestApi/Dockerfile",
         ".",
       ]
     env:
@@ -26,7 +26,7 @@ steps:
         "-t",
         "eu.gcr.io/$PROJECT_ID/snippet_pgadmin:$TAG_NAME",
         "-f",
-        "./PGAdmin/",
+        "./PGAdmin/Dockerfile",
         ".",
       ]
     env:
@@ -43,7 +43,7 @@ steps:
         "-t",
         "eu.gcr.io/$PROJECT_ID/snippets_db:$TAG_NAME",
         "-f",
-        "./Docker/postgres/",
+        "./Docker/postgres/Dockerfile",
         ".",
       ]
     env:
