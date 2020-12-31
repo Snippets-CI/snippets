@@ -106,6 +106,8 @@ Data transfer "in" and “out” refers to transfer into and out of Amazon Elast
 9. Artifacts are not produced by our build, or rather they are pushed to the docker registry and as such we will not have any artifacts that should be saved
 10. Select CloudWatch logs, as they provide additional insight into how many builds failed and more important stats.
 
+In AWS ECR, you can have only have one repository per image but each repository can have multiple versions of a single image.
+In our case we have to create 3 repositories
 
 #### Building with cloudbuild.yaml
 
@@ -114,5 +116,7 @@ Data transfer "in" and “out” refers to transfer into and out of Amazon Elast
 Few issues you might have:
 - Incorrect policies set for cloudbuild
   - <https://docs.aws.amazon.com/codebuild/latest/userguide/setting-up.html#setting-up-service-role>
+  - <https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-access.html>
+  - <https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-policies.html>
 - Retry build fails
   - Changes to environment variables are not updated for a build that is restarted even if different values for parameters are shown in the build job (likely a bug)

@@ -5,8 +5,11 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - aws --version
-      - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
-      - ECR_REPOSITORY_URI="105334670318.dkr.ecr.us-east-1.amazonaws.com/snippets"
+      #- $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
+      - $(aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 105334670318.dkr.ecr.us-east-1.amazonaws.com)
+      - ECR_REPOSITORY_URI_1="105334670318.dkr.ecr.us-east-1.amazonaws.com/snippets_db"
+      - ECR_REPOSITORY_URI_2="105334670318.dkr.ecr.us-east-1.amazonaws.com/snippets_pgadmin"
+      - ECR_REPOSITORY_URI_3="105334670318.dkr.ecr.us-east-1.amazonaws.com/snippets_restapi"
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - AWS_IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
       - TAG_NUMBER="$(git describe --tags --abbrev=0)"
@@ -16,22 +19,22 @@ phases:
       - echo Build started on $now with tag $TAG_NUMBER
       - echo Building the Docker image...
       - docker-compose up -d --build
-      - docker tag snippets_db:latest $ECR_REPOSITORY_URI/snippets_db:$TAG_NUMBER
-      - docker tag snippets_db:latest $ECR_REPOSITORY_URI/snippets_db:latest
-      - docker tag snippets_pgadmin:latest $ECR_REPOSITORY_URI/snippets_pgadmin:$TAG_NUMBER
-      - docker tag snippets_pgadmin:latest $ECR_REPOSITORY_URI/snippets_pgadmin:latest
-      - docker tag snippets_restapi:latest $ECR_REPOSITORY_URI/snippets_restapi:$TAG_NUMBER
-      - docker tag snippets_restapi:latest $ECR_REPOSITORY_URI/snippets_restapi:latest
+      - docker tag snippets_db:latest $ECR_REPOSITORY_URI_1:$TAG_NUMBER
+      - docker tag snippets_db:latest $ECR_REPOSITORY_URI_1:latest
+      - docker tag snippets_pgadmin:latest $ECR_REPOSITORY_URI_2:$TAG_NUMBER
+      - docker tag snippets_pgadmin:latest $ECR_REPOSITORY_URI_2:latest
+      - docker tag snippets_restapi:latest $ECR_REPOSITORY_URI_3:$TAG_NUMBER
+      - docker tag snippets_restapi:latest $ECR_REPOSITORY_URI_3:latest
   post_build:
     commands:
       - echo Build completed on $now tag $TAG_NUMBER
       - echo Pushing the Docker images...
-      - docker push $ECR_REPOSITORY_URI/snippets_db:latest
-      - docker push $ECR_REPOSITORY_URI/snippets_pgadmin:latest
-      - docker push $ECR_REPOSITORY_URI/snippets_restapi:latest
-      - docker push $ECR_REPOSITORY_URI/snippets_db:$TAG_NUMBER
-      - docker push $ECR_REPOSITORY_URI/snippets_pgadmin:$TAG_NUMBER
-      - docker push $ECR_REPOSITORY_URI/snippets_restapi:$TAG_NUMBER
+      - docker push $ECR_REPOSITORY_URI_1:$TAG_NUMBER
+      - docker push $ECR_REPOSITORY_URI_1:latest
+      - docker push $ECR_REPOSITORY_URI_2:$TAG_NUMBER
+      - docker push $ECR_REPOSITORY_URI_2:latest
+      - docker push $ECR_REPOSITORY_URI_3:$TAG_NUMBER
+      - docker push $ECR_REPOSITORY_URI_3:latest
 artifacts:
   files:
     - imageDetail.json
