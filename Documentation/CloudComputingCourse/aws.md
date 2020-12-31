@@ -46,6 +46,11 @@ The AWS CodeBuild free tier includes 100 build minutes of build.general1.small p
 
 You may incur additional charges if your builds transfer data or use other AWS services. For example, you may incur charges from Amazon CloudWatch Logs for build log streams, Amazon S3 for build artifact storage, and AWS Key Management Service for encryption. You may also incur additional charges if you use AWS CodeBuild with AWS CodePipeline.
 
+If you want to use the secret manager:
+
+Pricing
+$0.40 per secret per month
+$0.05 per 10,000 API calls
 
 #### Container Registry
 
@@ -90,7 +95,7 @@ Data transfer "in" and “out” refers to transfer into and out of Amazon Elast
 4. Select your VCS Repository (Github)
    1. If Github is not allowed access yet, you can select repositories that AWS has access to
 5. Add a webhook event
-   1. Add condition for a new tag push -> HEAD_REF : `^refs/tags/^v\d+\.\d+\.\d+`  
+   1. Add condition for a new tag push -> HEAD_REF : `^refs/tags/v\d+\.\d+\.\d+`  
    2. Add another filter group for pull requests
 6. Manage the environment, [amazon linux 2](https://aws.amazon.com/amazon-linux-2/) is the recommended system as it provides packages and configurations with many aws tools
    1. Set the privileged flag as we want to build docker images
@@ -101,6 +106,13 @@ Data transfer "in" and “out” refers to transfer into and out of Amazon Elast
 9. Artifacts are not produced by our build, or rather they are pushed to the docker registry and as such we will not have any artifacts that should be saved
 10. Select CloudWatch logs, as they provide additional insight into how many builds failed and more important stats.
 
+
 #### Building with cloudbuild.yaml
 
 <https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html>
+
+Few issues you might have:
+- Incorrect policies set for cloudbuild
+  - <https://docs.aws.amazon.com/codebuild/latest/userguide/setting-up.html#setting-up-service-role>
+- Retry build fails
+  - Changes to environment variables are not updated for a build that is restarted even if different values for parameters are shown in the build job (likely a bug)
