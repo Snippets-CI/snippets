@@ -17,11 +17,11 @@ phases:
       - echo Building the Docker image...
       - docker-compose up -d --build
       - docker tag snippets_db:latest $ECR_REPOSITORY_URI/snippets_db:$TAG_NUMBER
-      - docker tag snippets_db:latest $ECR_REPOSITORY_URI/snippets_db:$latest
+      - docker tag snippets_db:latest $ECR_REPOSITORY_URI/snippets_db:latest
       - docker tag snippets_pgadmin:latest $ECR_REPOSITORY_URI/snippets_pgadmin:$TAG_NUMBER
-      - docker tag snippets_pgadmin:latest $ECR_REPOSITORY_URI/snippets_pgadmin:$latest
+      - docker tag snippets_pgadmin:latest $ECR_REPOSITORY_URI/snippets_pgadmin:latest
       - docker tag snippets_restapi:latest $ECR_REPOSITORY_URI/snippets_restapi:$TAG_NUMBER
-      - docker tag snippets_restapi:latest $ECR_REPOSITORY_URI/snippets_restapi:$latest
+      - docker tag snippets_restapi:latest $ECR_REPOSITORY_URI/snippets_restapi:latest
   post_build:
     commands:
       - echo Build completed on $now tag $TAG_NUMBER
