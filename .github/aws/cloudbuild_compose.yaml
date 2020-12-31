@@ -1,0 +1,33 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
+      - ECR_REPOSITORY_URI=105334670318.dkr.ecr.us-east-1.amazonaws.com
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - AWS_IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
+      - TAG_NUMBER="$(git describe --tags --abbrev=0)"
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - docker-compose up -d --build
+      - docker tag snippets_db:latest $ECR_REPOSITORY_URI/snippets_db:$TAG_NUMBER
+      - docker tag snippets_pgadmin:latest $ECR_REPOSITORY_URI/snippets_pgadmin:$TAG_NUMBER
+      - docker tag snippets_restapi:latest $ECR_REPOSITORY_URI/snippets_restapi:$TAG_NUMBER
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $ECR_REPOSITORY_URI/snippets_db:latest
+      - docker push $ECR_REPOSITORY_URI/snippets_pgadmin:latest
+      - docker push $ECR_REPOSITORY_URI/snippets_restapi:latest
+      - docker push $ECR_REPOSITORY_URI/snippets_db:$TAG_NUMBER
+      - docker push $ECR_REPOSITORY_URI/snippets_pgadmin:$TAG_NUMBER
+      - docker push $ECR_REPOSITORY_URI/snippets_db:$TAG_NUMBER
+artifacts:
+  files:
+    - imageDetail.json
