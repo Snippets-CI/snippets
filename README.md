@@ -6,8 +6,7 @@ Sometimes when writing code you forget what the optimal solution for a particula
 
 ### Goal
 
-The goal of this project is to create a service where users can save code snippets. Users can login and view their snippets that they perviously added. These snippets can be easily copied and tweaked to the users liking. 
-
+The goal of this project is to create a service where users can save code snippets. Users can log in and view their snippets that they previously added. These snippets can be easily copied and tweaked to the users liking. 
 
 ### Realization
 

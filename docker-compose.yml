@@ -8,7 +8,7 @@ services:
   postgres_db:
     build: ./Docker/postgres/
     image: snippets_db
-    container_name: snippets_postgres_db
+    container_name: snippets_db
     restart: unless-stopped
     environment:
       POSTGRES_USER: admin
@@ -46,7 +46,7 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: 123
       POSTGRES_DB: postgres
-      POSTGRES_HOST_NAME: host=snippets_postgres_db
+      POSTGRES_HOST_NAME: host=snippets_db
       REST_API_PORT: 8010
     ports:
       - 8010:8010
