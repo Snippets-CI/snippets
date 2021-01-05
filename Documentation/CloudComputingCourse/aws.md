@@ -106,8 +106,8 @@ Data transfer "in" and “out” refers to transfer into and out of Amazon Elast
 9. Artifacts are not produced by our build, or rather they are pushed to the docker registry and as such we will not have any artifacts that should be saved
 10. Select CloudWatch logs, as they provide additional insight into how many builds failed and more important stats.
 
-In AWS ECR, you can have only have one repository per image but each repository can have multiple versions of a single image.
-In our case we have to create 3 repositories
+In AWS ECR, you can have only have one repository per image but each repository can have multiple versions of a single image. ECR only allows pushes if a repository has already been created.
+In our case we have to create 3 repositories.
 
 #### Building with cloudbuild.yaml
 
