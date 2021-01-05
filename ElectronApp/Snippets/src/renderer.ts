@@ -25,7 +25,7 @@ import $ from "jquery";
  * Declarations
  * ********************/
 
-const restApiConnectionString = "https://snippet-cicd.herokuapp.com/";
+const restApiConnectionString = "http://localhost:8010/";
 const defaultLanguage = "markdown";
 let currentUser: user.UserDto = null;
 let currentSnippet: snippet.SnippetDto = null;
