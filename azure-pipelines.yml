@@ -1,0 +1,46 @@
+# Docker
+# Build and push images to Azure Container Registry
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- azure
+
+resources:
+- repo: self
+
+variables:
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: 'a49622a7-b77d-44d1-a5b1-266633a0b3a4'
+  imageRepository: 'snippets'
+  containerRegistry: 'snippetscontainerregistry.azurecr.io'
+  tag: '$(Build.BuildId)'
+  
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
+stages:
+- stage: Build
+  displayName: Build and push stage
+  jobs:  
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: DockerCompose@0
+      inputs:
+        containerregistrytype: 'Azure Container Registry'
+        azureSubscription: 'Azure für Bildungseinrichtungen(f326e4c7-7827-4649-b4b1-e0719f776b2e)'
+        azureContainerRegistry: '{"loginServer":"snippetscontainerregistry.azurecr.io", "id" : "/subscriptions/f326e4c7-7827-4649-b4b1-e0719f776b2e/resourceGroups/Snippets-RG/providers/Microsoft.ContainerRegistry/registries/SnippetsContainerRegistry"}'
+        dockerComposeFile: '**/docker-compose.yml'
+        action: 'Build services'
+        additionalImageTags: '$(Build.BuildId)'
+    - task: DockerCompose@0
+      inputs:
+        containerregistrytype: 'Azure Container Registry'
+        azureSubscription: 'Azure für Bildungseinrichtungen(f326e4c7-7827-4649-b4b1-e0719f776b2e)'
+        azureContainerRegistry: '{"loginServer":"snippetscontainerregistry.azurecr.io", "id" : "/subscriptions/f326e4c7-7827-4649-b4b1-e0719f776b2e/resourceGroups/Snippets-RG/providers/Microsoft.ContainerRegistry/registries/SnippetsContainerRegistry"}'
+        dockerComposeFile: '**/docker-compose.yml'
+        action: 'Push services'
+        additionalImageTags: '$(Build.BuildId)'
+    
