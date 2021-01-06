@@ -10,7 +10,7 @@ resources:
 
 variables:
   # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: 'a49622a7-b77d-44d1-a5b1-266633a0b3a4'
+  dockerRegistryServiceConnection: 'e2c2a7e3-b882-40a7-bb27-ef2d499446d7'
   imageRepository: 'snippets'
   containerRegistry: 'snippetscontainerregistry.azurecr.io'
   tag: '$(Build.BuildId)'
