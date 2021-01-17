@@ -43,4 +43,14 @@ stages:
         dockerComposeFile: '**/docker-compose.yml'
         action: 'Push services'
         additionalImageTags: '$(Build.BuildId)'
-    
+    - task: CopyFiles@2
+      displayName: 'Copy Files'
+      inputs:
+        Contents: |
+          **/.github/azure/k8s_deployment.yaml
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'deploy'
+        publishLocation: 'Container'
