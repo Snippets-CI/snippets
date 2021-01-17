@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snippets-dev
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: snippets-dev
+    spec:
+      containers:
+      - name: snippets_dev
+        image: snippets_restapi
+        ports:
+        - containerPort: 3000
+          name: snippets_restapi
+---
+apiVersion: v1
+kind: service
+metadata:
+  name: snippets-dev
+spec:
+  ports:
+  -port: 3000
+  selector:
+    app: snippets-dev
