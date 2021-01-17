@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: snippets-dev
-        image: markusseiberl/snippets_restapi:latest
+        image: snippets_restapi
         ports:
         - containerPort: 8010
           name: snippets-rest
