@@ -29,14 +29,14 @@ func (a *App) Initialize(user, password, dbname string, dbhost string, middlewar
 
 	fmt.Println("[*] Initialize...")
 
-	connectionString :=
-		fmt.Sprintf("user=%s password=%s dbname=%s %s sslmode=disable", user, password, dbname, dbhost)
+	//connectionString :=
+	//	fmt.Sprintf("user=%s password=%s dbname=%s %s sslmode=disable", user, password, dbname, dbhost)
 
-	var err error
-	a.DB, err = sql.Open("postgres", connectionString)
-	if err != nil {
-		log.Fatal(err)
-	}
+	//var err error
+	//a.DB, err = sql.Open("postgres", connectionString)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 
 	a.Router = chi.NewRouter()
 
@@ -51,8 +51,8 @@ func (a *App) Initialize(user, password, dbname string, dbhost string, middlewar
 
 	a.initializeRoutes()
 
-	ensureExtensionExists(a.DB)
-	ensureTablesExist(a.DB)
+	//ensureExtensionExists(a.DB)
+	//ensureTablesExist(a.DB)
 }
 
 // Run http listen and serve
