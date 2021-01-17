@@ -54,3 +54,20 @@ stages:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: 'deploy'
         publishLocation: 'Container'
+- stage: Deploy
+  displayName: Deploy to kubernetes
+  jobs:
+  - job: Deploy
+    displayName: Deploy
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: KubernetesManifest@0
+      inputs:
+        action: 'deploy'
+        kubernetesServiceConnection: 'snippets-k8s-service-connection'
+        namespace: 'default'
+        strategy: 'canary'
+        percentage: '100'
+        manifests: './.github/azure/k8s_deployment.yaml'
+        containers: 'snippets_restapi:$(Build.BuildId)'
