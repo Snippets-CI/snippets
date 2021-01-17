@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: snippets-dev
-        image: snippets_restapi
+        image: snippetscontainerregistry.azurecr.io/snippets_restapi:latest
         ports:
         - containerPort: 8010
           name: snippets-rest
