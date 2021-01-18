@@ -222,6 +222,23 @@ Needs IAM permissions to load from ecr, error warnings give no info whatsoever i
 }
 ```
 
+In addition the security group needs to be set and this:
+
+1
+
+Fixed. Answering myself, for future reference.
+
+There were two basic problems:
+
+- EB really (really!) wants to get connections on port 80 from the public internet. At deployment time it creates a new security group for the environment, which opens port 80. Editing that group to open more ports does not help because of problem #2.
+    The default configuration for a single-instance docker environment will deploy with nginx as a reverse proxy, mapping port 80 of the instance to whatever port was configured as the HostPort in Dockerrun.aws.json (or to the ContainerPort if no HostPort is defined). This is a problem for a Minecraft client/server connection, because nginx is at bottom a web server, and the client sends packets that are not valid HTTP requests.
+
+So, the solution is to:
+
+- Make the client connect to port 80, specifying it as IP_ADDRESS:80
+    Remove nginx from the configuration. The easiest way to do so is through the Web UI: after the EB environment launches, click the Configuration link, then the Modify button in the Software section; select None from the Proxy Server pulldown at the top, then click the Apply Configuration button. The environment will be re-deployed, but with port 80 mapped straight to the docker container through iptables, without a reverse proxy in between.
+
+
 #### Deployment policies
 
 <https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.rolling-version-deploy.html?icmpid=docs_elasticbeanstalk_console>
