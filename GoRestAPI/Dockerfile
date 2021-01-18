@@ -31,4 +31,4 @@ COPY --from=builder /app/snippets .
 EXPOSE 8010
  
 # Run the service myapp when a container of this image is launched
-CMD ["./snippets"]
+ENTRYPOINT ["./snippets"]
