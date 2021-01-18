@@ -18,6 +18,8 @@ spec:
         ports:
         - containerPort: 8010
           name: snippets-rest
+        imagePullSecrets:
+        - name: acrsecretkey
 ---
 apiVersion: v1
 kind: Service
