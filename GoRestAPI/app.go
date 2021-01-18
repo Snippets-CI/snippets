@@ -27,12 +27,11 @@ func (a *App) Initialize(user, password, dbname string, dbhost string, middlewar
 	fmt.Println("[*] Waiting for db to settle...")
 	time.Sleep(3 * time.Second)
 
-	fmt.Println("[*] Initialize...")
+	fmt.Println("[*] Initializing...")
 
-	connectionString :=
-		fmt.Sprintf("user=%s password=%s dbname=%s %s sslmode=disable", user, password, dbname, dbhost)
+	connectionString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", dbhost, 5432, user, password, dbname)
 
-	fmt.Println(connectionString)
+	fmt.Println("Connection string: " + connectionString)
 
 	var err error
 	a.DB, err = sql.Open("postgres", connectionString)
@@ -40,6 +39,7 @@ func (a *App) Initialize(user, password, dbname string, dbhost string, middlewar
 		log.Fatal(err)
 		fmt.Println("[!] Error while opening sql connection")
 	}
+	fmt.Println("[*] Finished connecting")
 
 	a.Router = chi.NewRouter()
 
