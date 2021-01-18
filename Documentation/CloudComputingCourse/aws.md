@@ -187,6 +187,39 @@ Load balancer only with:
 High availability
 High availability (using Spot and On-Demand instances)
 
+
+Needs IAM permissions to load from ecr:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowEbAuth",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:GetAuthorizationToken"
+            ],
+            "Resource": [
+                "*"
+            ]
+        },
+        {
+            "Sid": "AllowPull",
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:ecr:*:YOUR_ID:repository/*"
+            ],
+            "Action": [
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "ecr:BatchCheckLayerAvailability"
+            ]
+        }
+    ]
+}
+```
+
 #### Deployment policies
 
 <https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.rolling-version-deploy.html?icmpid=docs_elasticbeanstalk_console>
