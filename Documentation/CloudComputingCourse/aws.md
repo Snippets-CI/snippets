@@ -1,4 +1,6 @@
-# Google
+# AWS
+
+As student you are restricted in certain actions. You can't create a code pipeline due to missing rights.
 
 ## Integration with different VCS with CodeBuild
 
@@ -29,6 +31,7 @@ Two possible ways are:
 
 <https://calculator.aws/#/>
 <https://aws.amazon.com/amazon-linux-2/>
+<https://aws.amazon.com/rds/postgresql/pricing/>
 
 The AWS CodeBuild free tier includes 100 build minutes of build.general1.small per month. The CodeBuild free tier does not expire automatically at the end of your 12-month AWS Free Tier term. It is available to new and existing AWS customers.
 
@@ -120,3 +123,63 @@ Few issues you might have:
   - <https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-policies.html>
 - Retry build fails
   - Changes to environment variables are not updated for a build that is restarted even if different values for parameters are shown in the build job (likely a bug)
+
+### Amazon RDS
+
+#### Pricing
+
+<https://aws.amazon.com/rds/postgresql/pricing/>
+
+
+Multi AZ:
+Select Create Replica in Different Zone to have Amazon RDS maintain a synchronous standby replica in a different Availability Zone than the DB instance. Amazon RDS will automatically fail over to the standby in the case of a planned or unplanned outage of the primary. 
+
+On-Demand DB Instances:
+
+On-Demand DB Instances let you pay for compute capacity by the hour your DB Instance runs with no long-term commitments. This frees you from the costs and complexities of planning, purchasing, and maintaining hardware and transforms what are commonly large fixed costs into much smaller variable costs.
+
+
+| Standard Instances - Current Generation 	| Price Per Hour 	|
+|:-:	|:-:	|
+| db.t3.micro 	| $0.021 	|
+| db.t3.small 	| $0.042 	|
+| db.t3.medium 	| $0.084 	|
+| ..... 	| ..... 	|
+| db.m5.16xlarge 	| $6.784 	|
+| db.m5.24xlarge 	| $10.176 	|
+
+
+Reserved instances:
+
+Amazon RDS Reserved Instances give you the option to reserve a DB instance for a one or three year term and in turn receive a significant discount compared to the On-Demand Instance pricing for the DB instance. Amazon RDS provides three RI payment options -- No Upfront, Partial Upfront, All Upfront -- that enable you to balance the amount you pay upfront with your effective hourly price.
+
+Amazon RDS Reserved Instances provide size flexibility for the PostgreSQL database engine. With size flexibility, your RI’s discounted rate will automatically apply to usage of any size in the same instance family (M5, T3, R5, etc.)
+
+Please note that Reserved Instance prices don't cover storage or I/O costs. To learn more about features, payment options and rules, please visit our Reserved Instances page.
+
+Region:
+1 Year  
+db.t3.micro  
+Frankfurt  
+
+| Payment Option 	| Upfront 	| Monthly* 	| Effective Hourly** 	| Savings over On-Demand 	| On-Demand Hourly 	|
+|:-:	|:-:	|:-:	|:-:	|:-:	|:-:	|
+|                        No Upfront                      	|                        $0                      	|                        $10.439                      	|                                                 $0.014                                             	|                        32%                      	|                          $0.0210                        	|
+|                        Partial Upfront                      	|                        $60                      	|                        $4.964                      	|                                                 $0.014                                             	|                        35%                      	|                          $0.0210                        	|
+|                        All Upfront                      	|                        $117                      	|                        $0.000                      	|                                                 $0.013                                             	|                        36%                      	|                          $0.0210                        	|
+
+1 Year db.r5.24xlarge  
+Frankfurt  
+
+| Payment Option 	| Upfront 	| Monthly* 	| Effective Hourly** 	| Savings over On-Demand 	| On-Demand Hourly 	|
+|:-:	|:-:	|:-:	|:-:	|:-:	|:-:	|
+|                        No Upfront                      	|                        $0                      	|                        $7,069.612                      	|                                                 $9.684                                             	|                        34%                      	|                          $14.6400                        	|
+|                        Partial Upfront                      	|                        $40,398                      	|                        $3,366.468                      	|                                                 $9.223                                             	|                        37%                      	|                          $14.6400                        	|
+|                        All Upfront                      	|                        $79,179                      	|                        $0.000                      	|                                                 $9.039                                             	|                        38%                      	|                          $14.6400                        	|
+
+
+### Elastic Beanstalk
+
+Load balancer only with:  
+High availability
+High availability (using Spot and On-Demand instances)

@@ -7,9 +7,9 @@ phases:
       - aws --version
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
       #- $(aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 105334670318.dkr.ecr.us-east-1.amazonaws.com)
-      - ECR_REPOSITORY_URI_1="105334670318.dkr.ecr.us-east-1.amazonaws.com/snippets_db"
-      - ECR_REPOSITORY_URI_2="105334670318.dkr.ecr.us-east-1.amazonaws.com/snippets_pgadmin"
-      - ECR_REPOSITORY_URI_3="105334670318.dkr.ecr.us-east-1.amazonaws.com/snippets_restapi"
+      - ECR_REPOSITORY_URI_1="436760934442.dkr.ecr.eu-central-1.amazonaws.com/snippets_db"
+      - ECR_REPOSITORY_URI_2="436760934442.dkr.ecr.eu-central-1.amazonaws.com/snippets_pgadmin"
+      - ECR_REPOSITORY_URI_3="436760934442.dkr.ecr.eu-central-1.amazonaws.com/snippets_restapi"
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - AWS_IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
       - TAG_NUMBER="$(git describe --tags --abbrev=0)"
