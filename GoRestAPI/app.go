@@ -36,6 +36,7 @@ func (a *App) Initialize(user, password, dbname string, dbhost string, middlewar
 	a.DB, err = sql.Open("postgres", connectionString)
 	if err != nil {
 		log.Fatal(err)
+		fmt.Println("[!] Error while opening sql connection")
 	}
 
 	a.Router = chi.NewRouter()
@@ -53,11 +54,13 @@ func (a *App) Initialize(user, password, dbname string, dbhost string, middlewar
 
 	ensureExtensionExists(a.DB)
 	ensureTablesExist(a.DB)
+
+	fmt.Println("[*] Finished Initializing")
 }
 
 // Run http listen and serve
 func (a *App) Run(addr string) {
-	fmt.Println("[*] ListenAndServe...")
+	fmt.Println("[*] ListenAndServe on " + addr)
 	log.Fatal(http.ListenAndServe(addr, a.Router))
 }
 

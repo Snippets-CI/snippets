@@ -47,7 +47,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_HOST_NAME: host=${POSTGRES_HOST_NAME}
-      REST_API_PORT: 8010
+      REST_API_PORT: ${REST_API_PORT}
     ports:
       - 8010:8010
     networks: 
