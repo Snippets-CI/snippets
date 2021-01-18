@@ -129,6 +129,8 @@ Few issues you might have:
 
 ### Amazon RDS
 
+To access a RDS instance from outside you need to select a VPC with a security Group that has incoming connections allowed. Setting source to `0.0.0.0/0` for inbound connections allows every IPv4 with every port.
+
 #### Pricing
 
 <https://aws.amazon.com/rds/postgresql/pricing/>
@@ -188,7 +190,7 @@ High availability
 High availability (using Spot and On-Demand instances)
 
 
-Needs IAM permissions to load from ecr:
+Needs IAM permissions to load from ecr, error warnings give no info whatsoever if permissions are missing:
 
 ```json
 {
@@ -252,8 +254,6 @@ For the Traffic splitting deployment policy you can configure the following:
 
 - Traffic split – The initial percentage of incoming client traffic that Elastic Beanstalk shifts to environment instances running the new application version you're deploying.  
   Traffic splitting evaluation time – The time period, in minutes, that Elastic Beanstalk waits after an initial healthy deployment before proceeding to shift all incoming client traffic to the new application version that you're deploying.
-
-
 
 ### Elastic Container Service
 

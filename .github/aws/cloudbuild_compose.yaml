@@ -17,7 +17,7 @@ phases:
     commands:
       - echo Build started on $now with tag $AWS_IMAGE_TAG
       - echo Building the Docker image...
-      - docker-compose up -d --build
+      - docker-compose -f docker-compose_aws.yml up -d --build
       - docker tag snippets_db:latest $ECR_REPOSITORY_URI_1:$AWS_IMAGE_TAG
       - docker tag snippets_db:latest $ECR_REPOSITORY_URI_1:latest
       - docker tag snippets_pgadmin:latest $ECR_REPOSITORY_URI_2:$AWS_IMAGE_TAG
