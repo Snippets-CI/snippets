@@ -12,28 +12,27 @@ phases:
       - ECR_REPOSITORY_URI_3="436760934442.dkr.ecr.eu-central-1.amazonaws.com/snippets_restapi"
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - AWS_IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
-      - TAG_NUMBER="$(git describe --tags --abbrev=0)"
       - now=$(date)
   build:
     commands:
-      - echo Build started on $now with tag $TAG_NUMBER
+      - echo Build started on $now with tag $AWS_IMAGE_TAG
       - echo Building the Docker image...
       - docker-compose up -d --build
-      - docker tag snippets_db:latest $ECR_REPOSITORY_URI_1:$TAG_NUMBER
+      - docker tag snippets_db:latest $ECR_REPOSITORY_URI_1:$AWS_IMAGE_TAG
       - docker tag snippets_db:latest $ECR_REPOSITORY_URI_1:latest
-      - docker tag snippets_pgadmin:latest $ECR_REPOSITORY_URI_2:$TAG_NUMBER
+      - docker tag snippets_pgadmin:latest $ECR_REPOSITORY_URI_2:$AWS_IMAGE_TAG
       - docker tag snippets_pgadmin:latest $ECR_REPOSITORY_URI_2:latest
-      - docker tag snippets_restapi:latest $ECR_REPOSITORY_URI_3:$TAG_NUMBER
+      - docker tag snippets_restapi:latest $ECR_REPOSITORY_URI_3:$AWS_IMAGE_TAG
       - docker tag snippets_restapi:latest $ECR_REPOSITORY_URI_3:latest
   post_build:
     commands:
-      - echo Build completed on $now tag $TAG_NUMBER
+      - echo Build completed on $now tag $AWS_IMAGE_TAG
       - echo Pushing the Docker images...
-      - docker push $ECR_REPOSITORY_URI_1:$TAG_NUMBER
+      - docker push $ECR_REPOSITORY_URI_1:$AWS_IMAGE_TAG
       - docker push $ECR_REPOSITORY_URI_1:latest
-      - docker push $ECR_REPOSITORY_URI_2:$TAG_NUMBER
+      - docker push $ECR_REPOSITORY_URI_2:$AWS_IMAGE_TAG
       - docker push $ECR_REPOSITORY_URI_2:latest
-      - docker push $ECR_REPOSITORY_URI_3:$TAG_NUMBER
+      - docker push $ECR_REPOSITORY_URI_3:$AWS_IMAGE_TAG
       - docker push $ECR_REPOSITORY_URI_3:latest
 artifacts:
   files:
