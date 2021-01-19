@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
 	"golang.org/x/crypto/bcrypt"
@@ -61,16 +62,19 @@ type LoginCredentials struct {
 
 func ensureTablesExist(db *sql.DB) {
 	if _, err := db.Exec(tableCreationQueryUsers); err != nil {
+		fmt.Println("[*] Table user does not exist")
 		log.Fatal(err)
 	}
 
 	if _, err := db.Exec(tableCreationQuerySnippets); err != nil {
+		fmt.Println("[*] Table snippets does not exist")
 		log.Fatal(err)
 	}
 }
 
 func ensureExtensionExists(db *sql.DB) {
 	if _, err := db.Exec(extensionQueryUUID); err != nil {
+		fmt.Println("[*] Extension does not exist")
 		log.Fatal(err)
 	}
 }

@@ -43,10 +43,10 @@ func (a *App) Initialize(user, password, dbname string, dbhost string, middlewar
 
 	fmt.Println("[*] Setting up chi router")
 	a.Router = chi.NewRouter()
-	fmt.Println("[*] Chi router finished")
+	fmt.Println("[*] Chi router setup finished")
 
 	if middlewareEnabled {
-		fmt.Println("[*] Middleware enabled!")
+		fmt.Println("[*] Middleware enabled")
 		a.Router.Use(middleware.RequestID)
 		a.Router.Use(middleware.RealIP)
 		a.Router.Use(middleware.Logger)
@@ -59,7 +59,7 @@ func (a *App) Initialize(user, password, dbname string, dbhost string, middlewar
 	a.initializeRoutes()
 
 	fmt.Println("[*] Ensuring extension exists")
-	ensureExtensionExists(a.DB)
+	// ensureExtensionExists(a.DB)
 
 	fmt.Println("[*] Ensuring db exists")
 	ensureTablesExist(a.DB)
