@@ -36,25 +36,30 @@ func (a *App) Initialize(user, password, dbname string, dbhost string, middlewar
 	var err error
 	a.DB, err = sql.Open("postgres", connectionString)
 	if err != nil {
-		log.Fatal(err)
 		fmt.Println("[!] Error while opening sql connection")
+		log.Fatal(err)
 	}
 	fmt.Println("[*] Finished connecting")
 
 	a.Router = chi.NewRouter()
 
 	if middlewareEnabled {
+		fmt.Println("[*] Middleware enabled!")
 		a.Router.Use(middleware.RequestID)
 		a.Router.Use(middleware.RealIP)
 		a.Router.Use(middleware.Logger)
 		a.Router.Use(middleware.Recoverer)
+		fmt.Println("[*] Middleware setup finished")
 	}
 
 	a.Router.Use(middleware.Timeout(60 * time.Second))
 
 	a.initializeRoutes()
 
+	fmt.Println("[*] Ensuring extension exists")
 	ensureExtensionExists(a.DB)
+
+	fmt.Println("[*] Ensuring db exists")
 	ensureTablesExist(a.DB)
 
 	fmt.Println("[*] Finished Initializing")

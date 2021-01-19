@@ -49,7 +49,7 @@ services:
       POSTGRES_HOST_NAME: host=${POSTGRES_HOST_NAME}
       REST_API_PORT: ${REST_API_PORT}
     ports:
-      - 8010:8010
+      - 80:80
     networks: 
       - postgres
     restart: unless-stopped
