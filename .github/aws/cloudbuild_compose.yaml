@@ -8,8 +8,7 @@ phases:
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
       #- $(aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 105334670318.dkr.ecr.us-east-1.amazonaws.com)
       - ECR_REPOSITORY_URI_1="436760934442.dkr.ecr.eu-central-1.amazonaws.com/snippets_db"
-      - ECR_REPOSITORY_URI_2="436760934442.dkr.ecr.eu-central-1.amazonaws.com/snippets_pgadmin"
-      - ECR_REPOSITORY_URI_3="436760934442.dkr.ecr.eu-central-1.amazonaws.com/snippets_restapi"
+      - ECR_REPOSITORY_URI_2="436760934442.dkr.ecr.eu-central-1.amazonaws.com/snippets_restapi"
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - AWS_IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
       - now=$(date)
@@ -21,10 +20,8 @@ phases:
       - docker-compose -f docker-compose_aws.yml up -d --build
       - docker tag snippets_db:latest $ECR_REPOSITORY_URI_1:$AWS_IMAGE_TAG
       - docker tag snippets_db:latest $ECR_REPOSITORY_URI_1:latest
-      - docker tag snippets_pgadmin:latest $ECR_REPOSITORY_URI_2:$AWS_IMAGE_TAG
-      - docker tag snippets_pgadmin:latest $ECR_REPOSITORY_URI_2:latest
-      - docker tag snippets_restapi:latest $ECR_REPOSITORY_URI_3:$AWS_IMAGE_TAG
-      - docker tag snippets_restapi:latest $ECR_REPOSITORY_URI_3:latest
+      - docker tag snippets_restapi:latest $ECR_REPOSITORY_URI_2:$AWS_IMAGE_TAG
+      - docker tag snippets_restapi:latest $ECR_REPOSITORY_URI_2:latest
   post_build:
     commands:
       - echo Build completed on $now tag $AWS_IMAGE_TAG
@@ -33,8 +30,6 @@ phases:
       - docker push $ECR_REPOSITORY_URI_1:latest
       - docker push $ECR_REPOSITORY_URI_2:$AWS_IMAGE_TAG
       - docker push $ECR_REPOSITORY_URI_2:latest
-      - docker push $ECR_REPOSITORY_URI_3:$AWS_IMAGE_TAG
-      - docker push $ECR_REPOSITORY_URI_3:latest
       - rm docker-compose.yml
 artifacts:
   files:
