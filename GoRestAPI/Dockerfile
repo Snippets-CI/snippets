@@ -7,6 +7,8 @@ LABEL maintainer='andreas.roither@protonmail.com'
 # install git for dependencies
 RUN apk add --no-cache git
 
+ENV CGO_ENABLED=0
+
 # Set working directory: `/app`
 WORKDIR /app/
  

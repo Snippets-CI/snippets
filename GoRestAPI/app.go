@@ -99,15 +99,15 @@ func (a *App) initializeRoutes() {
 		r.Post("/", a.createUser)
 		r.Put("/", a.updateUser)
 
-		// route: /users/{userID}
+		// route: /user/{userID}
 		r.Route("/{userID}", func(r chi.Router) {
 
-			// route: /users/{userID}/snippets
+			// route: /user/{userID}/snippets
 			r.Route("/snippets", func(r chi.Router) {
 				r.Get("/", a.getSnippets)
 				r.Post("/", a.createSnippet)
 
-				// route: /users/{userID}/snippets/{snippetID}
+				// route: /user/{userID}/snippets/{snippetID}
 				r.Route("/{snippetID}", func(r chi.Router) {
 					r.Get("/", a.getSnippet)
 					r.Put("/", a.updateSnippet)
@@ -227,7 +227,7 @@ func (a *App) createUser(w http.ResponseWriter, r *http.Request) {
 	//   description: new mail for user
 	//   required: true
 	//   type: string
-	// - name: userName
+	// - username: userName
 	//   in: body
 	//   description: new name for user
 	//   required: true

@@ -25,6 +25,7 @@ import $ from "jquery";
  * Declarations
  * ********************/
 
+
 const restApiConnectionString = "http://snippets-env-1.eba-urnkpp3r.eu-central-1.elasticbeanstalk.com/";
 const defaultLanguage = "markdown";
 let currentUser: user.UserDto = null;
