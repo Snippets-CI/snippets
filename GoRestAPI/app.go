@@ -41,7 +41,9 @@ func (a *App) Initialize(user, password, dbname string, dbhost string, middlewar
 	}
 	fmt.Println("[*] Finished connecting")
 
+	fmt.Println("[*] Setting up chi router")
 	a.Router = chi.NewRouter()
+	fmt.Println("[*] Chi router finished")
 
 	if middlewareEnabled {
 		fmt.Println("[*] Middleware enabled!")
