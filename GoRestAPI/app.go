@@ -29,7 +29,7 @@ func (a *App) Initialize(user, password, dbname string, dbhost string, middlewar
 
 	fmt.Println("[*] Initializing...")
 
-	connectionString := fmt.Sprintf("%s port=%d user=%s password=%s dbname=%s sslmode=disable", dbhost, 5432, user, password, dbname)
+	connectionString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", dbhost, 5432, user, password, dbname)
 
 	fmt.Println("Connection string: " + connectionString)
 
