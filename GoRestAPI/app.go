@@ -27,37 +27,49 @@ func (a *App) Initialize(user, password, dbname string, dbhost string, middlewar
 	fmt.Println("[*] Waiting for db to settle...")
 	time.Sleep(3 * time.Second)
 
-	fmt.Println("[*] Initialize...")
+	fmt.Println("[*] Initializing...")
 
-	connectionString :=
-		fmt.Sprintf("user=%s password=%s dbname=%s %s sslmode=disable", user, password, dbname, dbhost)
+	connectionString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", dbhost, 5432, user, password, dbname)
+
+	fmt.Println("Connection string: " + connectionString)
 
 	var err error
 	a.DB, err = sql.Open("postgres", connectionString)
 	if err != nil {
+		fmt.Println("[!] Error while opening sql connection")
 		log.Fatal(err)
 	}
+	fmt.Println("[*] Finished connecting")
 
+	fmt.Println("[*] Setting up chi router")
 	a.Router = chi.NewRouter()
+	fmt.Println("[*] Chi router setup finished")
 
 	if middlewareEnabled {
+		fmt.Println("[*] Middleware enabled")
 		a.Router.Use(middleware.RequestID)
 		a.Router.Use(middleware.RealIP)
 		a.Router.Use(middleware.Logger)
 		a.Router.Use(middleware.Recoverer)
+		fmt.Println("[*] Middleware setup finished")
 	}
 
 	a.Router.Use(middleware.Timeout(60 * time.Second))
 
 	a.initializeRoutes()
 
-	ensureExtensionExists(a.DB)
+	fmt.Println("[*] Ensuring extension exists")
+	// ensureExtensionExists(a.DB)
+
+	fmt.Println("[*] Ensuring db exists")
 	ensureTablesExist(a.DB)
+
+	fmt.Println("[*] Finished Initializing")
 }
 
 // Run http listen and serve
 func (a *App) Run(addr string) {
-	fmt.Println("[*] ListenAndServe...")
+	fmt.Println("[*] ListenAndServe on " + addr)
 	log.Fatal(http.ListenAndServe(addr, a.Router))
 }
 

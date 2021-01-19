@@ -1,0 +1,49 @@
+version: "3.8"
+
+# Create a local data volume since windows and linux postgresql file systems
+# won't work together... on linux use a normal volume ./data
+# docker volume create --name data -d local
+
+services:
+  postgres_db:
+    build: ./Docker/postgres/
+    image: snippets_db
+    container_name: snippets_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: postgres
+    ports:
+      - 5432:5432
+    networks:
+      - postgres
+    volumes:
+      - postgres:/data/postgres
+    
+  restapi:
+    container_name: snippets_restapi
+    build: ./GoRestAPI/
+    image: snippets_restapi
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST_NAME: ${POSTGRES_HOST_NAME}
+      REST_API_PORT: ${REST_API_PORT}
+    ports:
+      - 80:80
+    networks: 
+      - postgres
+    restart: unless-stopped
+    depends_on:
+      - postgres_db
+
+networks:
+  postgres:
+    driver: bridge
+
+# comment out if normal os volumes are used
+volumes:
+  postgres:
+  pgadmin:
