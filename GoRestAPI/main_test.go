@@ -28,7 +28,7 @@ func getEnv(key, fallback string) string {
 
 func TestMain(m *testing.M) {
 
-	a.Initialize(getEnv("POSTGRES_USER", "admin"), getEnv("POSTGRES_PASSWORD", "123"), getEnv("POSTGRES_DB", "postgres"), getEnv("POSTGRES_HOST_NAME", "host=localhost"), false)
+	a.Initialize(getEnv("POSTGRES_USER", "admin"), getEnv("POSTGRES_PASSWORD", "123"), getEnv("POSTGRES_DB", "postgres"), getEnv("POSTGRES_HOST_NAME", "localhost"), false)
 	clearTable()
 
 	code := m.Run()

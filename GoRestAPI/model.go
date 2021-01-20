@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
 	"golang.org/x/crypto/bcrypt"
@@ -61,16 +62,22 @@ type LoginCredentials struct {
 
 func ensureTablesExist(db *sql.DB) {
 	if _, err := db.Exec(tableCreationQueryUsers); err != nil {
+		fmt.Println("[*] Could not execute user table creation query")
+		fmt.Println(err)
 		log.Fatal(err)
 	}
 
 	if _, err := db.Exec(tableCreationQuerySnippets); err != nil {
+		fmt.Println("[*] Could not execute snippets table creation query")
+		fmt.Println(err)
 		log.Fatal(err)
 	}
 }
 
 func ensureExtensionExists(db *sql.DB) {
 	if _, err := db.Exec(extensionQueryUUID); err != nil {
+		fmt.Println("[*] Could not execute extension creation query")
+		fmt.Println(err)
 		log.Fatal(err)
 	}
 }
@@ -90,6 +97,7 @@ func (user *User) getUser(db *sql.DB) error {
 	}
 
 	if err != nil {
+		fmt.Println(err)
 		err = user.getSnippets(db)
 	}
 
@@ -103,6 +111,7 @@ func (user *User) createUser(db *sql.DB) error {
 		user.Mail, user.Name, pwd).Scan(&user.ID)
 
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
@@ -132,6 +141,7 @@ func (s *Snippet) createSnippet(db *sql.DB) error {
 		s.Owner, s.Title, s.Lang, s.Category, s.Code).Scan(&s.ID)
 
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
@@ -156,6 +166,7 @@ func getSnippets(db *sql.DB, userID string) ([]Snippet, error) {
 		userID)
 
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 
@@ -186,5 +197,6 @@ func comparePasswords(hashedPwd string, plainPwd string) error {
 	bHashedPwd := []byte(hashedPwd)
 
 	err := bcrypt.CompareHashAndPassword(bHashedPwd, bPlainPwd)
+	fmt.Println(err)
 	return err
 }
