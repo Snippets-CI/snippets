@@ -28,12 +28,31 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
-    - task: Docker@2
-      displayName: Build and push an image to container registry
+    - task: DockerCompose@0
       inputs:
-        command: buildAndPush
-        repository: $(imageRepository)
-        dockerfile: $(dockerfilePath)
-        containerRegistry: $(dockerRegistryServiceConnection)
-        tags: |
-          $(tag)
+        containerregistrytype: 'Azure Container Registry'
+        azureSubscription: 'Azure für Bildungseinrichtungen(f326e4c7-7827-4649-b4b1-e0719f776b2e)'
+        azureContainerRegistry: '{"loginServer":"snippetscontainerregistry.azurecr.io", "id" : "/subscriptions/f326e4c7-7827-4649-b4b1-e0719f776b2e/resourceGroups/Snippets-RG/providers/Microsoft.ContainerRegistry/registries/SnippetsContainerRegistry"}'
+        dockerComposeFile: '**/docker-compose_azure.yml'
+        dockerComposeFileArgs: |
+          POSTGRES_USER=snippets@snippets-db
+          POSTGRES_PASSWORD=Asdf1234.
+          POSTGRES_DB=postgres
+          POSTGRES_HOST_NAME=snippets-db.postgres.database.azure.com
+          REST_API_PORT=8010
+        action: 'Build services'
+        includeSourceTags: true
+    - task: DockerCompose@0
+      inputs:
+        containerregistrytype: 'Azure Container Registry'
+        azureSubscription: 'Azure für Bildungseinrichtungen(f326e4c7-7827-4649-b4b1-e0719f776b2e)'
+        azureContainerRegistry: '{"loginServer":"snippetscontainerregistry.azurecr.io", "id" : "/subscriptions/f326e4c7-7827-4649-b4b1-e0719f776b2e/resourceGroups/Snippets-RG/providers/Microsoft.ContainerRegistry/registries/SnippetsContainerRegistry"}'
+        dockerComposeFile: '**/docker-compose_azure.yml'
+        dockerComposeFileArgs: |
+          POSTGRES_USER=snippets@snippets-db
+          POSTGRES_PASSWORD=Asdf1234.
+          POSTGRES_DB=postgres
+          POSTGRES_HOST_NAME=snippets-db.postgres.database.azure.com
+          REST_API_PORT=8010
+        action: 'Push services'
+        includeSourceTags: true
