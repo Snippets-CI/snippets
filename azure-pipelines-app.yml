@@ -3,7 +3,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 trigger:
-- main
+- azure-app
 
 resources:
 - repo: self
@@ -11,7 +11,7 @@ resources:
 variables:
   # Container registry service connection established during pipeline creation
   dockerRegistryServiceConnection: '9b5c3217-3c89-4632-a188-a908194df630'
-  imageRepository: 'snippetscisnippets'
+  imageRepository: 'snippets_restapi_dev'
   containerRegistry: 'snippetscontainerregistry.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/Docker/postgres/Dockerfile'
   tag: '$(Build.BuildId)_dev'
