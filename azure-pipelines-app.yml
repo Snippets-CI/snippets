@@ -21,6 +21,21 @@ stages:
 - stage: Build
   displayName: Build and push stage
   jobs:  
+  - job: QA
+    displayName: QA
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: SonarCloudPrepare@1
+      inputs:
+        SonarCloud: 'SonarCloud'
+        organization: 'markusseiberl-1'
+        scannerMode: 'CLI'
+        configMode: 'manual'
+        cliProjectKey: 'MarkusSeiberl_Snippets'
+        cliProjectName: 'Snippets'
+        cliSources: './GoRestAPI/'
+    - task: SonarCloudAnalyze@1
   - job: Build
     displayName: Build
     pool:
