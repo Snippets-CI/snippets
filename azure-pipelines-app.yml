@@ -13,8 +13,6 @@ variables:
   dockerRegistryServiceConnection: '9b5c3217-3c89-4632-a188-a908194df630'
   imageRepository: 'snippets_restapi_dev'
   containerRegistry: 'snippetscontainerregistry.azurecr.io'
-  dockerfilePath: '$(Build.SourcesDirectory)/Docker/postgres/Dockerfile'
-  tag: '$(Build.BuildId)_dev'
   
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
@@ -41,6 +39,7 @@ stages:
           POSTGRES_HOST_NAME=snippets-db.postgres.database.azure.com
           REST_API_PORT=8010
         action: 'Build services'
+        additionalImageTags: '$(Build.BuildId)'
         includeSourceTags: true
     - task: DockerCompose@0
       inputs:
@@ -55,4 +54,5 @@ stages:
           POSTGRES_HOST_NAME=snippets-db.postgres.database.azure.com
           REST_API_PORT=8010
         action: 'Push services'
+        additionalImageTags: '$(Build.BuildId)'
         includeSourceTags: true
