@@ -93,7 +93,7 @@ Data transfer "in" and “out” refers to transfer into and out of Amazon Elast
 #### Create Trigger
 
 Before you create a codebuild project, you need to review the IAM policies.  
-You need CloudWatch Logs , S3, Systems Manager, CodeCommit, CodeBuild and Elastic Container Registry  rights otherwise the build will fail.
+You need CloudWatch Logs, S3, Systems Manager, CodeCommit, CodeBuild and Elastic Container Registry rights otherwise the build will fail.
 
 1. Go to AWS CodeBuild
 2. Create a new build project

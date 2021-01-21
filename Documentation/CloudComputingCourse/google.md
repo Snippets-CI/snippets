@@ -181,4 +181,4 @@ Where:
 - `IMAGE` is the name of your image in Container Registry.
 - `DOCKERFILE_PATH`: path to your Dockerfile.
   
-Currently our project with a rest api in golang + postgres database and pgadmin takes `1min 40sec` with docker compose and `2min 40sec` if we build all dockerfiles separately.
+Currently our project with a rest api in golang + postgres database and pgadmin takes `1min 40sec` with docker compose and `2min 40sec` if we build all dockerfiles separately
