@@ -196,4 +196,9 @@ Information: HTTPS Everywhere with gcloud shell does not work
 
 <https://cloud.google.com/solutions/continuous-delivery-spinnaker-kubernetes-engine>
 
-setup can take up to 20 min for spinnaker
+setup can take up to 20 min for spinnaker.
+
+spin application save --application-name snippets \
+                      --owner-email example@example.com \
+                      --cloud-providers kubernetes \
+                      --gate-endpoint http://localhost:8080/gate
