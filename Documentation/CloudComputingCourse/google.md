@@ -184,6 +184,16 @@ Where:
 Currently our project with a rest api in golang + postgres database and pgadmin takes `1min 40sec` with docker compose and `2min 40sec` if we build all dockerfiles separately.
 
 
+### Gitops kubernetes pipeline
+
+<https://cloud.google.com/kubernetes-engine/docs/tutorials/gitops-cloud-build>
+
 ### Spinnaker cd pipeline
 
+Information: HTTPS Everywhere with gcloud shell does not work
+
+<https://console.cloud.google.com/sql/instances?project=snippets-299912>
+
 <https://cloud.google.com/solutions/continuous-delivery-spinnaker-kubernetes-engine>
+
+setup can take up to 20 min for spinnaker
