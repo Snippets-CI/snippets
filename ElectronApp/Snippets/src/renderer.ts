@@ -134,7 +134,7 @@ function logout(): void {
   $("#userNameLink").text(emptyText);
   $("#snippetList").empty();
 
-  $("#loginModal").modal("show");
+  ($("#loginModal") as any).modal("show");
 }
 
 function updateDimensions(): void {
@@ -217,7 +217,6 @@ async function loadUserAsync(
 
   return axios
     .post(`${connectionString}`, {
-      // eslint-disable-next-line @typescript-eslint/camelcase
       user_id: "",
       username: username,
       mail: usermail,
@@ -399,7 +398,7 @@ function createSnippetLinks(
 function loginAndRegisterResponseHandler(response: user.UserDto): void {
   if (response != null) {
     currentUser = response;
-    $("#loginModal").modal("hide").data("#loginModal", null);
+    ($("#loginModal") as any).modal("hide").data("#loginModal", null);
     $("#userNameLink").text("Hi " + currentUser.username);
 
     loadSnippetsAsync(restApiConnectionString, currentUser.user_id).then(
@@ -509,30 +508,31 @@ function intializeMainApplication(): void {
   initializeMonacoEditor();
   loadLanguages();
 
-  $("[data-toggle=popover]").popover();
-  $("#monacoSnippetName").click(() => {
+  ($("[data-toggle=popover]") as any).popover();
+  $("#monacoSnippetName").on("click", () => {
     if (currentSnippet != null) {
       $("#snippetUpdateName").val(currentSnippet.title);
-      $("#changeNameModal").modal("show");
+      ($("#changeNameModal") as any).modal("show");
     }
   });
 
-  $("#shareButton").click(() => {
+
+  $("#shareButton").on("click", () => {
     saveToClipboard();
   });
 
-  $("#updateSnippetButton").click(() => {
+  $("#updateSnippetButton").on("click", () => {
     const newSnippetName = $("#snippetUpdateName").val() as string;
 
     $("#monacoSnippetName").text(newSnippetName);
     $(`#${currentSnippet.snippet_id}`).text(newSnippetName);
-    $("#changeNameModal").modal("hide");
+    ($("#changeNameModal") as any).modal("hide");
 
     currentSnippet.title = newSnippetName;
     updateSnippetAsync(restApiConnectionString, currentUser.user_id);
   });
 
-  $("#snippetCreationLink").click(() => {
+  $("#snippetCreationLink").on("click", () => {
     createNewSnippetAsync(restApiConnectionString, currentUser.user_id).then(
       (snippetResponse) => {
         const ul = document.getElementById("snippetList");
@@ -566,7 +566,7 @@ function intializeMainApplication(): void {
 
 // Load Login Modal on start up
 $(window).on("load", function () {
-  $("#loginModal").modal("show");
+  ($("#loginModal") as any).modal("show");
 });
 
 window.addEventListener("resize", updateDimensions.bind(this));
