@@ -1,8 +1,39 @@
 # Pipeline
 
-For pricing see [here](https://azure.microsoft.com/en-us/pricing/details/devops/azure-devops-services/).
+For pricing see [here](https://azure.microsoft.com/en-us/pricing/details/devops/azure-devops-services/).  
 
-## Overview
+**Some interesting links:**
+
+- [Release Pipeline triggers](https://docs.microsoft.com/en-us/azure/devops/pipelines/release/triggers?view=azure-devops)
+- [Deployment Environment Strategies](https://docs.microsoft.com/en-us/azure/app-service/deploy-best-practices)
+- [SonarQube Integration](https://www.azuredevopslabs.com/labs/vstsextend/sonarcloud/)
+- [Teams Integration](https://azuredevopslabs.com/labs/vstsextend/teams/)
+
+## Pipeline for AAS (Azure App Service)
+
+1. Create ContainerRegistry in Azure  (Same as in AKS)
+2. Create PostgreSQL
+3. Create Azure App Service
+4. Create a Build Pipeline in AzureDevops
+5. Create a Release Pipeline in AzureDevops
+
+## 1. Create Container Registry (Duplicated)
+
+For detailed instructions see the same section in Azure Kubernetes Service
+
+## 2. Create PostgreSQL
+
+1. Search Azure Marketplace for 
+
+
+
+---
+---
+---
+---
+---
+
+## Pipeline for AKS (Azure Kubernetes Service)
 
 For a CI/CD pipeline 3 abstract steps are needed.  
 First we need a ContainerRegistry to save the build images.  

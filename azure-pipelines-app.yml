@@ -1,0 +1,63 @@
+# Docker
+# Build and push an image to Azure Container Registry
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- azure-app
+
+resources:
+- repo: self
+
+variables:
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: '9b5c3217-3c89-4632-a188-a908194df630'
+  imageRepository: 'snippets_restapi_dev'
+  containerRegistry: 'snippetscontainerregistry.azurecr.io'
+  
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
+stages:
+- stage: Build
+  displayName: Build and push stage
+  jobs:  
+  - job: QA
+    displayName: QA
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: SonarCloudPrepare@1
+      inputs:
+        SonarCloud: 'SonarCloud'
+        organization: 'markusseiberl-1'
+        scannerMode: 'CLI'
+        configMode: 'manual'
+        cliProjectKey: 'MarkusSeiberl_Snippets'
+        cliProjectName: 'Snippets'
+        cliSources: './GoRestAPI/'
+    - task: SonarCloudAnalyze@1
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: DockerCompose@0
+      inputs:
+        containerregistrytype: 'Azure Container Registry'
+        azureSubscription: 'Azure für Bildungseinrichtungen(f326e4c7-7827-4649-b4b1-e0719f776b2e)'
+        azureContainerRegistry: '{"loginServer":"snippetscontainerregistry.azurecr.io", "id" : "/subscriptions/f326e4c7-7827-4649-b4b1-e0719f776b2e/resourceGroups/Snippets-RG/providers/Microsoft.ContainerRegistry/registries/SnippetsContainerRegistry"}'
+        dockerComposeFile: '**/docker-compose_azure.yml'
+        dockerComposeFileArgs: ''
+        action: 'Build services'
+        additionalImageTags: '$(Build.BuildId)'
+        includeSourceTags: true
+    - task: DockerCompose@0
+      inputs:
+        containerregistrytype: 'Azure Container Registry'
+        azureSubscription: 'Azure für Bildungseinrichtungen(f326e4c7-7827-4649-b4b1-e0719f776b2e)'
+        azureContainerRegistry: '{"loginServer":"snippetscontainerregistry.azurecr.io", "id" : "/subscriptions/f326e4c7-7827-4649-b4b1-e0719f776b2e/resourceGroups/Snippets-RG/providers/Microsoft.ContainerRegistry/registries/SnippetsContainerRegistry"}'
+        dockerComposeFile: '**/docker-compose_azure.yml'
+        dockerComposeFileArgs: ''
+        action: 'Push services'
+        additionalImageTags: '$(Build.BuildId)'
+        includeSourceTags: true
